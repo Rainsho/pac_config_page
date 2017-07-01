@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>PAC配置</title>
+</head>
+
+<body onload="load()">
+    <h2>PAC配置信息</h1>
+        <table border="1">
+            <tr>
+                <th>当前服务器IP</th>
+                <th>当前PAC配置IP</th>
+                <th>可用配置</th>
+            </tr>
+            <tr>
+                <td id="onServer"></td>
+                <td id="onFile"></td>
+                <td id="state"></td>
+
+            </tr>
+        </table>
+</body>
+<script>
+    var onServer = document.getElementById('onServer');
+    var onFile = document.getElementById('onFile');
+    var state = document.getElementById('state');
+
+    function load() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'get/address');
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var res = JSON.parse(xhr.responseText);
+                onServer.innerText = res.onServer;
+                onFile.innerText = res.onFile;
+                if (res.onServer == res.onFile) {
+                    state.innerText = `http://${res.onFile}/static/new.pac`;
+                } else {
+                    state.innerHTML = '<button onclick="update()">更新配置</button>';
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    function update() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('PUT', 'put/newpac');
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var res = JSON.parse(xhr.responseText);
+                onServer.innerText = res.onServer;
+                onFile.innerText = res.onFile;
+                state.innerText = `http://${res.onFile}/static/new.pac`;
+            }
+        };
+        xhr.send();
+    }
+
+</script>
+
+</html>
