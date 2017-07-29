@@ -1,6 +1,6 @@
-const env = true;
+const isDev = process.env.NODE_ENV === 'development';
 
 module.exports = {
-    path: env ? '/Users/Rainsho/Downloads' : '/home/maru/App/static',
-    lan: env ? 'en0' : 'wlan0',
-}
+    path: isDev ? '/Users/Rainsho/Downloads' : '/home/maru/App/static',
+    lan: isDev ? 'en0' : 'wlan0',
+};
