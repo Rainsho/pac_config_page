@@ -4,7 +4,7 @@ Which is useful when others borrow my Nexus device and connet to an DHCP enabled
 
 ## 转发过程：
 
-VPS: Internet --> ss-server(socks5) --> kcp-server(udp) -->
+VPS: Internet --> ss-server(socks5) --> kcp-server(udp) -->  
 Intranet: kcp-client(udp) --> ss-local(socks5) --> polipo(http) --> pac --> LAN
 
 多台 VPS 使用相同的 kcp 配置(端口及加密方式)，Intranet 设备仅更新 kcp 配置内的对应 IP 即可。
