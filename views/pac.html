@@ -106,7 +106,11 @@
                 var { currentHost } = JSON.parse(xhr.responseText);
                 var ipts = document.getElementsByName('host');
                 for (let x of ipts) {
-                    if (x.value === currentHost) { x.checked = true; break; }
+                    if (x.value === currentHost) {
+                        btnPing.disabled = false;
+                        x.checked = true;
+                        break;
+                    }
                 }
             }
         }
