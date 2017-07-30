@@ -1,10 +1,22 @@
 const fs = require('fs');
 const os = require('os');
+const net = require('net');
+const { exec } = require('child_process');
+const ping = require('ping');
 
-const CST = require('./constants');
-const origin = `${CST.path}/gwf.pac`;
-const target = `${CST.path}/new.pac`;
-const lan = CST.lan;
+const { path, conf, lan, hosts } = require('../constants');
+const origin = `${path}/gwf.pac`;
+const target = `${path}/new.pac`;
+const config = `${conf}/config.json`;
+
+const exec_ext = (command) => exec(command, (error, stdout, stderr) => {
+    if (error) {
+        console.error(`exec error:\n${error}`);
+        return;
+    }
+    console.log(`stdout:\n${stdout}`);
+    console.log(`stderr:\n${stderr}`);
+});
 
 module.exports = {
     'GET /': async (ctx, next) => {
@@ -38,4 +50,32 @@ module.exports = {
             onFile: ip
         };
     },
+
+    'GET /get/ping': async (ctx, next) => {
+        const data = fs.readFileSync(config, 'ASCII');
+        const lines = data.split('\n');
+        const currentHost = /\d+.\d+.\d+.\d+/.exec(lines[2])[0];
+        let pingInfo = null;
+        await Promise.all(hosts.map(x => ping.promise.probe(x, { min_reply: 10 })))
+            .then(x => pingInfo = x);
+        if (pingInfo) pingInfo = pingInfo
+            .filter(x => x.alive && x.avg !== 'unknown');
+        ctx.response.type = 'application/json';
+        ctx.response.body = { pingInfo, currentHost };
+    },
+
+    'PUT /put/config': async (ctx, next) => {
+        const { cur, min } = ctx.request.body;
+        if (net.isIPv4(cur) && net.isIP(min)) {
+            let data = fs.readFileSync(config, 'ASCII');
+            const lines = data.split('\n');
+            const currentHost = /\d+.\d+.\d+.\d+/.exec(lines[2])[0];
+            if (cur !== currentHost) return;
+            data = data.replace(cur, min);
+            fs.writeFileSync(config, data);
+            if (process.env.NODE_ENV === 'production') exec_ext('sudo supervisorctl restart kcptun');
+            ctx.response.type = 'application/json';
+            ctx.response.body = { currentHost: min };
+        }
+    }
 };

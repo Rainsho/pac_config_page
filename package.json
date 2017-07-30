@@ -6,13 +6,18 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "export NODE_ENV=production && node index.js",
-    "dev": "export NODE_ENV=development && node index.js"
+    "dev": "export NODE_ENV=development && node index.js",
+    "watch": "export NODE_ENV=development && supervisor index.js"
   },
   "author": "Rainsho",
   "license": "ISC",
   "dependencies": {
     "koa": "2.0.0",
     "koa-bodyparser": "3.2.0",
-    "koa-router": "7.0.0"
+    "koa-router": "7.0.0",
+    "ping": "0.2.2"
+  },
+  "devDependencies": {
+    "supervisor": "^0.12.0"
   }
 }

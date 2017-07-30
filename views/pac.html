@@ -6,26 +6,32 @@
     <title>PAC配置</title>
 </head>
 
-<body onload="load()">
-    <h2>PAC配置信息</h1>
-        <table border="1">
-            <tr>
-                <th>当前服务器IP</th>
-                <th>当前PAC配置IP</th>
-                <th>可用配置</th>
-            </tr>
-            <tr>
-                <td id="onServer"></td>
-                <td id="onFile"></td>
-                <td id="state"></td>
-
-            </tr>
-        </table>
+<body onload="load();">
+    <h2>PAC配置信息</h2>
+    <table border="1">
+        <tr>
+            <th>当前服务器IP</th>
+            <th>当前PAC配置IP</th>
+            <th>可用配置</th>
+        </tr>
+        <tr>
+            <td id="onServer"></td>
+            <td id="onFile"></td>
+            <td id="state"></td>
+        </tr>
+    </table>
+    <h3>Ping测试</h3>
+    <button id="btnPing" onclick="getPing();">开始测试</button>
+    <button id="btnChange" onclick="void(0);" disabled>切换服务器</button>
+    <div id="pingResult"></div>
 </body>
 <script>
     var onServer = document.getElementById('onServer');
     var onFile = document.getElementById('onFile');
     var state = document.getElementById('state');
+    var btnPing = document.getElementById('btnPing');
+    var pingResult = document.getElementById('pingResult');
+    var btnChange = document.getElementById('btnChange');
 
     function load() {
         var xhr = new XMLHttpRequest();
@@ -38,7 +44,7 @@
                 if (res.onServer == res.onFile) {
                     state.innerText = `http://${res.onFile}/static/new.pac`;
                 } else {
-                    state.innerHTML = '<button onclick="update()">更新配置</button>';
+                    state.innerHTML = '<button onclick="update();">更新配置</button>';
                 }
             }
         };
@@ -57,6 +63,54 @@
             }
         };
         xhr.send();
+    }
+
+    function getPing() {
+        btnPing.disabled = true;
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'get/ping');
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var res = JSON.parse(xhr.responseText);
+                var [p_c, p_min] = [{ time: 10000 }, { time: 10000 }];
+                var results = res.pingInfo.map((x, i) => {
+                    const checked = x.host === res.currentHost ? 'checked' : '';
+                    const hostMask = x.host.replace(/\d+.\d+$/, '*.*');
+                    if (checked) p_c = x;
+                    if (x.time < p_min.time) p_min = x;
+                    return `<input type="radio" ${checked} disabled 
+                        name="host" value="${x.host}" />
+                        <span>host: ${hostMask} avg_ping: ${x.avg} ms</span><br />`;
+                });
+                pingResult.innerHTML = results.join('');
+                /**
+                 * 当前服务器比备用服务器慢 30% 时启用服务器切换功能
+                 * 等价算法为 (p_c - p_min)/p_min > 0.3
+                 */
+                if ((p_c.time - p_min.time) / p_min.time > 0.3) {
+                    btnChange.onclick = changeHost.bind(null, p_c.host, p_min.host);
+                    btnChange.disabled = false;
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    function changeHost(cur, min) {
+        btnChange.disabled = true;
+        var xhr = new XMLHttpRequest();
+        xhr.open('PUT', 'put/config');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var { currentHost } = JSON.parse(xhr.responseText);
+                var ipts = document.getElementsByName('host');
+                for (let x of ipts) {
+                    if (x.value === currentHost) { x.checked = true; break; }
+                }
+            }
+        }
+        xhr.send(JSON.stringify({ cur, min }));
     }
 
 </script>
