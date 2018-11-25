@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "export NODE_ENV=production && node index.js",
     "dev": "export NODE_ENV=development && node index.js",
-    "watch": "export NODE_ENV=development && supervisor index.js"
+    "watch": "export NODE_ENV=development && supervisor index.js",
+    "build": "cd views && npm run build",
+    "deploy": "scp -r views/build maru@192.168.100.200:App/pac/views/build"
   },
   "author": "Rainsho",
   "license": "ISC",
