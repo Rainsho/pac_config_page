@@ -19,12 +19,6 @@ const exec_ext = (command) => exec(command, (error, stdout, stderr) => {
 });
 
 module.exports = {
-    'GET /': async (ctx, next) => {
-        const html = fs.readFileSync('views/pac.html', 'utf-8');
-        ctx.response.type = 'text/html;charset=utf-8';
-        ctx.response.body = html;
-    },
-
     'GET /get/address': async (ctx, next) => {
         const ips = os.networkInterfaces()[lan];
         const ip0 = ips.find(x => x.family == 'IPv4').address;
