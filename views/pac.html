@@ -91,6 +91,8 @@
                     btnChange.onclick = changeHost.bind(null, p_c.host, p_min.host);
                     btnChange.disabled = false;
                 }
+
+                btnPing.disabled = false;
             }
         };
         xhr.send();
