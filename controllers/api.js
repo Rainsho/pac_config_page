@@ -68,7 +68,7 @@ module.exports = {
             data = data.replace(cur, min);
             fs.writeFileSync(config, data);
             if (process.env.NODE_ENV === 'production') {
-                await exec_ext('sudo supervisorctl restart kcptun');
+                await exec_ext('supervisorctl restart kcptun');
             }
             ctx.response.type = 'application/json';
             ctx.response.body = { currentHost: min };
