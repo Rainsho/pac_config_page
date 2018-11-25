@@ -2,6 +2,7 @@ const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const cors = require('@koa/cors');
 const serve = require('koa-static');
+const { resolve } = require('path');
 const controller = require('./controller');
 
 const app = new Koa();
@@ -22,7 +23,7 @@ app.use(bodyParser());
 app.use(controller());
 
 // add static files
-app.use(serve('views', { index: 'pac.html' }));
+app.use(serve(resolve(__dirname, 'views/build'), { index: 'pac.html' }));
 
 app.listen(3000);
 
