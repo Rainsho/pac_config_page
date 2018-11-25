@@ -1,11 +1,11 @@
-const { resolve, relative } = require('path');
+const { resolve, relative, basename } = require('path');
 const fs = require('fs-extra');
 const constants = require('../constants');
 
 const nasDir = constants.nas;
 
 async function getAllFiles(dir) {
-  const subdirs = await fs.readdir(dir);
+  const subdirs = (await fs.readdir(dir)).filter(x => !x.startsWith('.'));
   const files = await Promise.all(
     subdirs.map(async subdir => {
       const res = resolve(dir, subdir);
@@ -13,7 +13,7 @@ async function getAllFiles(dir) {
 
       return fileStat.isDirectory()
         ? getAllFiles(res)
-        : { path: relative(nasDir, res), size: fileStat.size };
+        : { name: basename(res), path: relative(nasDir, res), size: fileStat.size };
     })
   );
 
