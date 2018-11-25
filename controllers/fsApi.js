@@ -1,5 +1,6 @@
 const { resolve, relative, basename } = require('path');
 const fs = require('fs-extra');
+const disk = require('diskusage');
 const constants = require('../constants');
 
 const nasDir = constants.nas;
@@ -21,6 +22,10 @@ async function getAllFiles(dir) {
 }
 
 module.exports = {
+  'GET /fs/disk': async ctx => {
+    ctx.body = disk.checkSync('/');
+  },
+
   'GET /fs/file': async ctx => {
     ctx.body = await getAllFiles(nasDir);
   },

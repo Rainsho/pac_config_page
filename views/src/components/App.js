@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import { Card, Table, Button, Modal, Input } from 'antd';
-import { getFiles, deleteFile, renameFile } from '../utils/api';
+import { getFiles, deleteFile, renameFile, getDisk } from '../utils/api';
+import { fmtBytes } from '../utils/util';
 
 class App extends Component {
-  state = { files: [] };
+  state = { files: [], disk: {} };
 
-  syncFiles = () => getFiles().then(files => this.setState({ files }));
+  syncFiles = () =>
+    Promise.all([getFiles(), getDisk()]).then(([files, disk]) => this.setState({ files, disk }));
 
   componentDidMount() {
     this.syncFiles();
@@ -41,12 +43,15 @@ class App extends Component {
   };
 
   render() {
-    const { files } = this.state;
+    const { files, disk } = this.state;
+    const { available: ava, total } = disk;
+
+    const diskSize = ava ? ` (${fmtBytes(ava, 2)}/${fmtBytes(total, 2)})` : '';
 
     const columns = [
       { title: 'name', dataIndex: 'name' },
       { title: 'path', dataIndex: 'path' },
-      { title: 'size', dataIndex: 'size' },
+      { title: 'size', dataIndex: 'size', align: 'right', render: val => fmtBytes(val) },
       {
         title: 'opt',
         align: 'center',
@@ -63,7 +68,7 @@ class App extends Component {
 
     return (
       <Card
-        title="Nexus File System"
+        title={`Nexus File System${diskSize}`}
         bordered={false}
         extra={
           <>

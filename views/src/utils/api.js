@@ -2,6 +2,10 @@ import config from './config';
 
 const FS_API = `${config.SERVER}fs/file`;
 
+export function getDisk() {
+  return fetch(`${config.SERVER}fs/disk`).then(x => x.json());
+}
+
 export function getFiles() {
   return fetch(FS_API).then(x => x.json());
 }
