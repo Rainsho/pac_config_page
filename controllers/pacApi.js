@@ -77,7 +77,10 @@ module.exports = {
       const currentHost = /\d+.\d+.\d+.\d+/.exec(lines[2])[0];
 
       // back-end check?! why I do this?!
-      if (cur !== currentHost) return;
+      if (cur !== currentHost) {
+        ctx.status = 204;
+        return;
+      }
 
       data = data.replace(cur, min);
       fs.writeFileSync(config, data);
@@ -87,5 +90,7 @@ module.exports = {
 
       ctx.body = { currentHost: min };
     }
+
+    ctx.status = 204;
   },
 };

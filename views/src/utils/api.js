@@ -28,9 +28,9 @@ export function updateAddress() {
 }
 
 export function getPing() {
-  return Request.get(`${SERVER}/pac/ping`);
+  return Request.get(`${SERVER}pac/ping`);
 }
 
 export function updateConfig(cur, min) {
-  return Request.put(`${SERVER}/pac/config`, { cur, min });
+  return Request.put(`${SERVER}pac/config`, { cur, min });
 }

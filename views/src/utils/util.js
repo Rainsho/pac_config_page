@@ -1,3 +1,5 @@
+import { notification } from 'antd';
+
 export function fmtBytes(bytes, prec = 3) {
   if (Number.isNaN(parseInt(bytes, 10))) return bytes;
 
@@ -10,6 +12,18 @@ export function fmtBytes(bytes, prec = 3) {
   return `${(bytes / k ** i).toFixed(prec)} ${sizes[i]}`;
 }
 
+function checkStatus(response) {
+  if (response.status !== 200) {
+    notification.warning({
+      message: `Got status ${response.status}`,
+      description: 'What did you do?',
+    });
+    return Promise.resolve({});
+  }
+
+  return response.json();
+}
+
 export class Request {
   static async get(url) {
     return fetch(url).then(x => x.json());
@@ -20,7 +34,7 @@ export class Request {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-    }).then(x => (x.status === 200 ? x.json() : {}));
+    }).then(checkStatus);
   }
 
   static async delete(url, body) {
@@ -28,6 +42,6 @@ export class Request {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-    }).then(x => (x.status === 200 ? x.json() : {}));
+    }).then(checkStatus);
   }
 }
