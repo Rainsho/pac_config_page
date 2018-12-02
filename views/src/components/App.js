@@ -14,9 +14,9 @@ export default () => (
     <TabPane key="PAC" tab="PAC">
       <Pac />
     </TabPane>
-    <TabPane key="ARIC2" tab="ARIC2">
+    <TabPane key="ARIA2" tab="ARIA2">
       <iframe
-        title="ARIC2"
+        title="ARIA2"
         style={{ border: 'none', height: '100vh', width: '100vw' }}
         src={config.ARIA2_UI}
       />
