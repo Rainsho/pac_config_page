@@ -89,8 +89,8 @@ module.exports = {
       }
 
       ctx.body = { currentHost: min };
+    } else {
+      ctx.status = 204;
     }
-
-    ctx.status = 204;
   },
 };
