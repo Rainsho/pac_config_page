@@ -68,7 +68,12 @@ class Pac extends Component {
           style={{ marginTop: 16, display: pingInfo.length ? 'block' : 'none' }}
         >
           {pingInfo.map(info => (
-            <PingInfo current={currentHost} info={info} handleSwitch={this.switchServer} />
+            <PingInfo
+              key={info.host}
+              current={currentHost}
+              info={info}
+              handleSwitch={this.switchServer}
+            />
           ))}
         </Card>
       </Card>
