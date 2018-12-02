@@ -52,7 +52,7 @@ class Nas extends Component {
       {
         title: 'name',
         dataIndex: 'name',
-        render: (val, { path }) => <a href={`/static/${path}`}>{val}</a>,
+        render: (val, { path }) => <a href={`/nas/${path}`}>{val}</a>,
       },
       { title: 'path', dataIndex: 'path' },
       { title: 'size', dataIndex: 'size', align: 'right', render: val => fmtBytes(val) },
