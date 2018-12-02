@@ -1,5 +1,6 @@
 import React from 'react';
 import { Tabs } from 'antd';
+import config from '../utils/config';
 import Nas from './Nas';
 import Pac from './Pac';
 
@@ -12,6 +13,13 @@ export default () => (
     </TabPane>
     <TabPane key="PAC" tab="PAC">
       <Pac />
+    </TabPane>
+    <TabPane key="ARIC2" tab="ARIC2">
+      <iframe
+        title="ARIC2"
+        style={{ border: 'none', height: '100vh', width: '100vw' }}
+        src={config.ARIA2_UI}
+      />
     </TabPane>
   </Tabs>
 );
