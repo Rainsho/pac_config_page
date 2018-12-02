@@ -1,27 +1,25 @@
+import { Request } from './util';
 import config from './config';
 
-const FS_API = `${config.SERVER}fs/file`;
+const { SERVER } = config;
+const FS_API = `${SERVER}fs/file`;
 
 export function getDisk() {
-  return fetch(`${config.SERVER}fs/disk`).then(x => x.json());
+  return Request.get(`${SERVER}fs/disk`);
 }
 
 export function getFiles() {
-  return fetch(FS_API).then(x => x.json());
+  return Request.get(FS_API);
 }
 
 export function renameFile(path = '', name) {
-  return fetch(FS_API, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, name }),
-  }).then(x => (x.status === 200 ? x.json() : {}));
+  return Request.put(FS_API, { path, name });
 }
 
 export function deleteFile(path, purge) {
-  return fetch(FS_API, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, purge }),
-  }).then(x => (x.status === 200 ? x.json() : {}));
+  return Request.put(FS_API, { path, purge });
+}
+
+export function getAddress() {
+  return Request.get(`${SERVER}pac/address`);
 }

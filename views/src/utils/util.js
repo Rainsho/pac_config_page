@@ -9,3 +9,25 @@ export function fmtBytes(bytes, prec = 3) {
 
   return `${(bytes / k ** i).toFixed(prec)} ${sizes[i]}`;
 }
+
+export class Request {
+  static async get(url) {
+    return fetch(url).then(x => x.json());
+  }
+
+  static async put(url, body) {
+    return fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(x => (x.status === 200 ? x.json() : {}));
+  }
+
+  static async delete(url, body) {
+    return fetch(url, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(x => (x.status === 200 ? x.json() : {}));
+  }
+}
