@@ -16,7 +16,7 @@ export function renameFile(path = '', name) {
 }
 
 export function deleteFile(path, purge) {
-  return Request.put(`${SERVER}fs/file`, { path, purge });
+  return Request.delete(`${SERVER}fs/file`, { path, purge });
 }
 
 export function getAddress() {
