@@ -23,7 +23,7 @@ app.use(bodyParser());
 app.use(controller());
 
 // add static files
-app.use(serve(resolve(__dirname, 'views/build'), { index: 'pac.html' }));
+app.use(serve(resolve(__dirname, 'views/build')));
 
 app.listen(3000);
 
