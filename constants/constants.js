@@ -5,7 +5,7 @@ const _default = {
   conf: isDev ? '/Users/Rainsho/Downloads' : '/home/maru/Downloads/kcptun',
   lan: isDev ? 'en0' : 'wlan0',
   hosts: ['192.168.0.0', '192.168.100.1'],
-  nas: isDev ? '/Users/Rainsho/Downloads/test' : '/home/maru/nas',
+  nas: isDev ? '/Users/Rainsho/Downloads' : '/home/maru/nas',
 };
 
 try {

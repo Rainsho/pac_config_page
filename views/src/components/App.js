@@ -49,7 +49,11 @@ class App extends Component {
     const diskSize = ava ? ` (${fmtBytes(ava, 2)}/${fmtBytes(total, 2)})` : '';
 
     const columns = [
-      { title: 'name', dataIndex: 'name' },
+      {
+        title: 'name',
+        dataIndex: 'name',
+        render: (val, { path }) => <a href={`/static/${path}`}>{val}</a>,
+      },
       { title: 'path', dataIndex: 'path' },
       { title: 'size', dataIndex: 'size', align: 'right', render: val => fmtBytes(val) },
       {
