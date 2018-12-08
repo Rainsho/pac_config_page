@@ -1,16 +1,14 @@
 const fs = require('fs-extra');
 const path = require('path');
-const { db } = require('../constants');
-
-const _bak = path.resolve(__dirname, '../constants/_bak.json');
+const { db, bakFile } = require('../constants');
 
 async function sync() {
   console.log('doing sync');
 
-  const old = await fs.readJson(_bak);
+  const old = await fs.readJson(bakFile);
   const data = Object.assign({}, old, db);
 
-  await fs.writeJson(_bak, data, { spaces: '  ' });
+  await fs.writeJson(bakFile, data, { spaces: '  ' });
 }
 
 module.exports = sync;

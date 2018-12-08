@@ -1,3 +1,5 @@
+const { resolve } = require('path');
+
 const isDev = process.env.NODE_ENV === 'development';
 
 const _default = {
@@ -6,6 +8,7 @@ const _default = {
   lan: isDev ? 'en0' : 'wlan0',
   hosts: ['192.168.0.0', '192.168.100.1'],
   nas: isDev ? '/Users/Rainsho/Downloads' : '/home/maru/nas',
+  bakFile: resolve(__dirname, '_bak.json'),
   db: {},
 };
 
