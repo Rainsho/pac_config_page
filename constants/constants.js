@@ -6,6 +6,7 @@ const _default = {
   lan: isDev ? 'en0' : 'wlan0',
   hosts: ['192.168.0.0', '192.168.100.1'],
   nas: isDev ? '/Users/Rainsho/Downloads' : '/home/maru/nas',
+  db: {},
 };
 
 try {

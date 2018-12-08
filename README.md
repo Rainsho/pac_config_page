@@ -17,6 +17,10 @@ Intranet: kcp-client(udp) --> ss-local(socks5) --> polipo(http) --> pac --> LAN
 仅在默认服务器的 ping 值大于 ping 值最低的服务器 30% 时启用按钮。服务器端校验 IP 是否合法以及
 传入的默认服务器 IP 是否与原设置相同。
 
-## 使用 React 重构前天页面
+## 使用 React 重构前台页面
 
 ![screenshot](./screenshot.png)
+
+## CHANGELOG
+
+冗余的功能越来越多，那就这样吧。 just have fun~

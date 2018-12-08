@@ -5,6 +5,9 @@ const serve = require('koa-static');
 const { resolve } = require('path');
 const controller = require('./controller');
 
+// schedules tasks
+require('./schedules');
+
 const app = new Koa();
 
 // log request URL:
