@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { Card, Button } from 'antd';
 import { updateAddress, getAddress, getPing, updateConfig } from '../utils/api';
-import PingInfo from './PingInfo';
-import ConfigInfo from './ConfigInfo';
+import { PingInfo, ConfigInfo } from './common';
 
 class Pac extends Component {
   state = {

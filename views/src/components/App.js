@@ -3,6 +3,7 @@ import { Tabs } from 'antd';
 import config from '../utils/config';
 import Nas from './Nas';
 import Pac from './Pac';
+import Info from './Info';
 
 const TabPane = Tabs.TabPane;
 
@@ -20,6 +21,9 @@ export default () => (
         style={{ border: 'none', height: '100vh', width: '100vw' }}
         src={config.ARIA2_UI}
       />
+    </TabPane>
+    <TabPane key="INFO" tab="INFO">
+      <Info />
     </TabPane>
   </Tabs>
 );

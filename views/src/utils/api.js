@@ -34,3 +34,7 @@ export function getPing() {
 export function updateConfig(cur, min) {
   return Request.put(`${SERVER}pac/config`, { cur, min });
 }
+
+export function getSDInfo(all = false) {
+  return Request.get(`${SERVER}sd/info${all ? '?all=true' : ''}`);
+}

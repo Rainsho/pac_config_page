@@ -45,3 +45,7 @@ export class Request {
     }).then(checkStatus);
   }
 }
+
+export function isIP(str = '') {
+  return /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.exec(str);
+}
