@@ -5,9 +5,6 @@ const serve = require('koa-static');
 const { resolve } = require('path');
 const controller = require('./controller');
 
-// schedules tasks
-require('./schedules');
-
 const app = new Koa();
 
 // log request URL:
@@ -31,3 +28,6 @@ app.use(serve(resolve(__dirname, 'views/build')));
 app.listen(3000);
 
 console.log('app started at port 3000...');
+
+// start schedules tasks
+require('./schedules');

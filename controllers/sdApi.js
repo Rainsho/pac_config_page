@@ -1,12 +1,12 @@
-const fs = require('fs-extra');
-const { db, bakFile } = require('../constants');
+const { db } = require('../constants');
+const sync = require('../schedules/sync');
 
 module.exports = {
   'GET /sd/info': async ctx => {
     const { all } = ctx.request.query;
 
     if (all) {
-      const data = await fs.readJson(bakFile);
+      const data = await sync();
       ctx.body = data;
     } else {
       ctx.body = db;
