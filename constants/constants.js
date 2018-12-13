@@ -13,6 +13,12 @@ const _default = {
 };
 
 try {
+  _default.db = require(_default.bakFile);
+} catch (e) {
+  console.warn(e);
+}
+
+try {
   const _hosts = require('./_hosts');
   _default.hosts = _hosts;
 } catch (e) {
