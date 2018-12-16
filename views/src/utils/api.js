@@ -38,3 +38,7 @@ export function updateConfig(cur, min) {
 export function getSDInfo(all = false) {
   return Request.get(`${SERVER}sd/info${all ? '?all=true' : ''}`);
 }
+
+export function persistFile(path) {
+  return Request.put(`${SERVER}fs/ftpd`, { path });
+}

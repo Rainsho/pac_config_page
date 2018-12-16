@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Card, Table, Button, Modal, Input } from 'antd';
-import { getFiles, deleteFile, renameFile, getDisk } from '../utils/api';
+import { Card, Table, Button, Modal, Input, notification } from 'antd';
+import { getFiles, deleteFile, renameFile, getDisk, persistFile } from '../utils/api';
 import { fmtBytes } from '../utils/util';
 
 class Nas extends Component {
@@ -42,6 +42,17 @@ class Nas extends Component {
     });
   };
 
+  handlePersist = path => {
+    Modal.confirm({
+      content: `Persist ${path} ?`,
+      maskClosable: true,
+      onOk: () =>
+        persistFile(path).then(({ desc }) => {
+          if (desc) notification.error({ message: desc });
+        }),
+    });
+  };
+
   render() {
     const { files, disk } = this.state;
     const { available: ava, total } = disk;
@@ -64,7 +75,10 @@ class Nas extends Component {
             <Button onClick={() => this.handleRename(path, name)} style={{ marginRight: 10 }}>
               Rename
             </Button>
-            <Button onClick={() => this.handleDelete(path)}>Delete</Button>
+            <Button onClick={() => this.handleDelete(path)} style={{ marginRight: 10 }}>
+              Delete
+            </Button>
+            <Button onClick={() => this.handlePersist(path)}>Persist</Button>
           </>
         ),
       },

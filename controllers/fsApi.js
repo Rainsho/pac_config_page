@@ -1,9 +1,12 @@
 const { resolve, relative, basename } = require('path');
 const fs = require('fs-extra');
 const disk = require('diskusage');
+const PromiseFtp = require('promise-ftp');
 const constants = require('../constants');
+const { now } = require('../utils');
 
-const nasDir = constants.nas;
+const ftp = new PromiseFtp();
+const { nas: nasDir, ftpServer, ftpDir } = constants;
 
 async function getAllFiles(dir) {
   const subdirs = (await fs.readdir(dir)).filter(x => !x.startsWith('.'));
@@ -19,6 +22,48 @@ async function getAllFiles(dir) {
   );
 
   return files.reduce((a, f) => a.concat(f), []);
+}
+
+async function doPersist(file, io) {
+  if (!fs.existsSync(file) || !io) return `${file} may not exists`;
+
+  await ftp.connect(ftpServer);
+
+  try {
+    const list = await ftp.list(ftpDir);
+
+    if (!list || !list.length) throw new Error('something wrong with the FTP server');
+  } catch (e) {
+    return e.message;
+  }
+
+  const { size } = fs.statSync(file);
+  const stream = fs.createReadStream(file);
+
+  let doneSize = 0;
+  let timer = now(false).t;
+  let mileStone = new Array(50).fill(0).map((x, i) => (i + 1) * 0.02);
+
+  stream.on('data', buff => {
+    doneSize += buff.length;
+
+    const percent = doneSize / size;
+    const doneStone = mileStone.filter(x => x > percent);
+
+    if (mileStone.length > doneStone.length) {
+      mileStone = doneStone;
+
+      const { s, t } = now(false);
+
+      console.log(t - timer, percent);
+      io.emit('progress', { s, file, percent });
+    }
+  });
+
+  await ftp.put(stream, `${ftpDir}/${basename(file)}`);
+  await ftp.end();
+
+  return '';
 }
 
 module.exports = {
@@ -61,5 +106,13 @@ module.exports = {
     }
 
     ctx.status = 204;
+  },
+
+  'PUT /fs/ftpd': async ctx => {
+    const { path = '' } = ctx.request.body;
+    const file = resolve(nasDir, path);
+    const desc = await doPersist(file, ctx.io);
+
+    ctx.body = { code: 200, desc };
   },
 };

@@ -4,12 +4,13 @@ const cors = require('@koa/cors');
 const serve = require('koa-static');
 const { resolve } = require('path');
 const controller = require('./controller');
+const { now } = require('./utils');
 
 const app = new Koa();
 
 // log request URL:
 app.use(async (ctx, next) => {
-  console.log(`Process ${ctx.request.method} ${ctx.request.url}...`);
+  console.log(now(), `Process ${ctx.request.method} ${ctx.request.url}...`);
   await next();
 });
 
