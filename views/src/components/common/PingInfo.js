@@ -1,5 +1,6 @@
 import React from 'react';
-import { Tag, Row, Col } from 'antd';
+import { Row, Col, Switch } from 'antd';
+import { Color } from './Color';
 
 const PingInfo = ({ current, info, handleSwitch }) => {
   const { host, avg } = info;
@@ -8,18 +9,18 @@ const PingInfo = ({ current, info, handleSwitch }) => {
     <Row type="flex" style={{ minHeight: 30 }}>
       <Col sm={4} lg={2}>
         {current === host ? (
-          <Tag color="#87d068">current</Tag>
+          <Switch checked />
         ) : (
-          <Tag color="#2db7f5" onClick={() => handleSwitch(current, host)}>
-            switch
-          </Tag>
+          <Switch onClick={() => handleSwitch(current, host)} />
         )}
       </Col>
       <Col sm={8} lg={4}>
-        host {host}
+        <Color.WhatBlue str="host" />
+        {host}
       </Col>
       <Col xs={24} sm={8} lg={4}>
-        avg_ping {avg} ms
+        <Color.LivingCoral str="avg_ping" />
+        {avg} ms
       </Col>
     </Row>
   );
