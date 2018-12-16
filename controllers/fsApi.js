@@ -24,19 +24,30 @@ async function getAllFiles(dir) {
   return files.reduce((a, f) => a.concat(f), []);
 }
 
-async function doPersist(file, io) {
-  if (!fs.existsSync(file) || !io) return `${file} may not exists`;
+async function beforePersist(file, io) {
+  if (!fs.existsSync(file) || !io) {
+    return `${file} may not exists`;
+  }
 
   await ftp.connect(ftpServer);
 
   try {
     const list = await ftp.list(ftpDir);
 
-    if (!list || !list.length) throw new Error('something wrong with the FTP server');
+    if (!list || !list.length) {
+      throw new Error('something wrong with the FTP server');
+    }
   } catch (e) {
     return e.message;
   }
 
+  // do not wait
+  doPersist(ftp, file, io);
+
+  return '';
+}
+
+async function doPersist(ftp, file, io) {
   const { size } = fs.statSync(file);
   const stream = fs.createReadStream(file);
 
@@ -62,8 +73,6 @@ async function doPersist(file, io) {
 
   await ftp.put(stream, `${ftpDir}/${basename(file)}`);
   await ftp.end();
-
-  return '';
 }
 
 module.exports = {
@@ -111,7 +120,7 @@ module.exports = {
   'PUT /fs/ftpd': async ctx => {
     const { path = '' } = ctx.request.body;
     const file = resolve(nasDir, path);
-    const desc = await doPersist(file, ctx.io);
+    const desc = await beforePersist(file, ctx.io);
 
     ctx.body = { code: 200, desc };
   },
