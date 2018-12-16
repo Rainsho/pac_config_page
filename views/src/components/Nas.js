@@ -1,16 +1,31 @@
 import React, { Component } from 'react';
-import { Card, Table, Button, Modal, Input, notification } from 'antd';
+import { Card, Table, Button, Modal, Input, notification, Progress } from 'antd';
+import io from 'socket.io-client';
 import { getFiles, deleteFile, renameFile, getDisk, persistFile } from '../utils/api';
 import { fmtBytes } from '../utils/util';
+import config from '../utils/config';
 
 class Nas extends Component {
-  state = { files: [], disk: {} };
+  constructor(props) {
+    super(props);
 
-  syncFiles = () =>
-    Promise.all([getFiles(), getDisk()]).then(([files, disk]) => this.setState({ files, disk }));
+    this.state = { files: [], disk: {}, file: '', percent: 0 };
+
+    this.syncFiles = () => {
+      Promise.all([getFiles(), getDisk()]).then(([files, disk]) => this.setState({ files, disk }));
+    };
+
+    this.io = io(config.SERVER);
+
+    this.io.on('progress', ({ file, percent }) => this.setState({ file, percent }));
+  }
 
   componentDidMount() {
     this.syncFiles();
+  }
+
+  componentWillUnmount() {
+    this.io.close();
   }
 
   handleRename = (path, name) => {
@@ -46,15 +61,18 @@ class Nas extends Component {
     Modal.confirm({
       content: `Persist ${path} ?`,
       maskClosable: true,
-      onOk: () =>
-        persistFile(path).then(({ desc }) => {
-          if (desc) notification.error({ message: desc });
-        }),
+      onOk: () => {
+        this.setState({ file: path, percent: 0 }, () => {
+          persistFile(path).then(({ desc }) => {
+            if (desc) notification.error({ message: desc });
+          });
+        });
+      },
     });
   };
 
   render() {
-    const { files, disk } = this.state;
+    const { files, disk, file, percent } = this.state;
     const { available: ava, total } = disk;
 
     const diskSize = ava ? ` (${fmtBytes(ava, 2)}/${fmtBytes(total, 2)})` : '';
@@ -99,6 +117,12 @@ class Nas extends Component {
           </>
         }
       >
+        {file && (
+          <>
+            <div>UPLOADING {file}</div>
+            <Progress style={{ marginBottom: 10 }} percent={parseInt(percent * 100, 10)} />
+          </>
+        )}
         <Table rowKey="path" pagination={false} dataSource={files} columns={columns} />
       </Card>
     );

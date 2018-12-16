@@ -66,7 +66,7 @@ async function doPersist(ftp, file, io) {
 
       const { s, t } = now(false);
 
-      console.log(t - timer, percent);
+      console.log(basename(file), t - timer, percent);
       io.emit('progress', { s, file, percent });
     }
   });
