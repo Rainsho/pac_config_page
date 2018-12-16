@@ -25,7 +25,12 @@ app.use(controller());
 // add static files
 app.use(serve(resolve(__dirname, 'views/build')));
 
-app.listen(3000);
+// engage socket.io
+const server = require('http').createServer(app.callback());
+const io = require('socket.io')(server);
+
+app.context.io = io;
+server.listen(3000);
 
 console.log('app started at port 3000...');
 
