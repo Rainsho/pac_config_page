@@ -19,8 +19,8 @@ try {
 }
 
 try {
-  const _hosts = require('./_hosts');
-  _default.hosts = _hosts;
+  const _secret = require('./_secret');
+  Object.assign(_default, _secret);
 } catch (e) {
   console.warn(e);
 }

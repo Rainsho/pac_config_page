@@ -1,10 +1,9 @@
-const fs = require('fs');
 const os = require('os');
-const net = require('net');
+const fs = require('fs-extra');
 const { exec } = require('child_process');
 const ping = require('ping');
 
-const { path, conf, lan, hosts } = require('../constants');
+const { path, conf, lan, hosts, keys = {} } = require('../constants');
 const origin = `${path}/gwf.pac`;
 const target = `${path}/new.pac`;
 const config = `${conf}/config.json`;
@@ -55,9 +54,9 @@ module.exports = {
 
   'GET /pac/ping': async (ctx, next) => {
     // read current 'host'
-    const data = fs.readFileSync(config, 'ASCII');
-    const lines = data.split('\n');
-    const currentHost = /\d+.\d+.\d+.\d+/.exec(lines[2])[0];
+    const kcpConfig = fs.readJsonSync(config);
+    const { remoteaddr } = kcpConfig;
+    const currentHost = remoteaddr.split(':').shift();
 
     // the default timeout is 2, which means
     // `ping` will stoped weather it reaches the `min_reply` times
@@ -71,26 +70,28 @@ module.exports = {
 
   'PUT /pac/config': async (ctx, next) => {
     const { cur, min } = ctx.request.body;
-    if (net.isIPv4(cur) && net.isIP(min)) {
-      let data = fs.readFileSync(config, 'ASCII');
-      const lines = data.split('\n');
-      const currentHost = /\d+.\d+.\d+.\d+/.exec(lines[2])[0];
 
-      // back-end check?! why I do this?!
-      if (cur !== currentHost) {
-        ctx.status = 204;
-        return;
-      }
+    const kcpConfig = fs.readJsonSync(config);
+    const { remoteaddr } = kcpConfig;
+    const currentHost = remoteaddr.split(':').shift();
 
-      data = data.replace(cur, min);
-      fs.writeFileSync(config, data);
-      if (process.env.NODE_ENV === 'production') {
-        await exec_ext('supervisorctl restart kcptun');
-      }
-
-      ctx.body = { currentHost: min };
-    } else {
+    // back-end check?! why I do this?!
+    if (cur !== currentHost) {
       ctx.status = 204;
+      return;
     }
+
+    const { port, key } = keys[min];
+    const addr = `${min}:${port}`;
+
+    kcpConfig.remoteaddr = addr;
+    kcpConfig.key = key;
+    fs.writeJsonSync(config, kcpConfig, { spaces: '    ' });
+
+    if (process.env.NODE_ENV === 'production') {
+      await exec_ext('supervisorctl restart kcptun');
+    }
+
+    ctx.body = { currentHost: min };
   },
 };
