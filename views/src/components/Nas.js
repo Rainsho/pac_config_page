@@ -24,7 +24,6 @@ class Nas extends Component {
       queue: [],
       file: '',
       percent: 0,
-      selectedRow: '',
       cancel: false,
     };
 
@@ -83,22 +82,20 @@ class Nas extends Component {
     });
   };
 
-  handlePersist = () => {
-    const { selectedRow } = this.state;
-
+  handlePersist = path => {
     Modal.confirm({
-      content: `Persist ${selectedRow} ?`,
+      content: `Persist ${path} ?`,
       maskClosable: true,
       onOk: () => {
         this.setState(
           {
-            file: selectedRow.split('/').pop(),
+            file: path.split('/').pop(),
             percent: 0,
             selectedRow: '',
             cancel: false,
           },
           () => {
-            persistFile(selectedRow).then(({ desc }) => {
+            persistFile(path).then(({ desc }) => {
               if (desc) notification.error({ message: desc.toString() });
             });
           }
@@ -113,19 +110,7 @@ class Nas extends Component {
     });
   };
 
-  rowSelection = uploaded => ({
-    type: 'radio',
-    onChange: selectedRowKeys => {
-      this.setState({ selectedRow: selectedRowKeys[0] });
-    },
-    getCheckboxProps: ({ name, path }) => ({
-      disabled: uploaded.map(x => x.id).includes(name),
-      name: path,
-    }),
-    // selectedRowKeys: [this.state.selectedRow],
-  });
-
-  columns = () => [
+  columns = uploaded => [
     {
       title: 'name',
       dataIndex: 'name',
@@ -137,20 +122,21 @@ class Nas extends Component {
       title: 'opt',
       align: 'center',
       render: (_, { path, name }) => (
-        <>
-          <Button onClick={() => this.handleRename(path, name)} style={{ marginRight: 10 }}>
-            Rename
-          </Button>
-          <Button onClick={() => this.handleDelete(path)} style={{ marginRight: 10 }}>
-            Delete
-          </Button>
-        </>
+        <Button.Group>
+          <Button icon="edit" onClick={() => this.handleRename(path, name)} />
+          <Button icon="delete" onClick={() => this.handleDelete(path)} />
+          <Button
+            icon="cloud-upload"
+            disabled={uploaded.map(x => x.id).includes(name)}
+            onClick={() => this.handlePersist(path)}
+          />
+        </Button.Group>
       ),
     },
   ];
 
   render() {
-    const { files, disk, queue, file, percent, selectedRow, cancel } = this.state;
+    const { files, disk, queue, file, percent, cancel } = this.state;
     const { available: ava, total } = disk;
 
     const diskSize = ava ? ` (${fmtBytes(ava, 2)}/${fmtBytes(total, 2)})` : '';
@@ -164,14 +150,6 @@ class Nas extends Component {
           <>
             <Button type="primary" style={{ marginRight: 10 }} onClick={this.syncFiles}>
               sync
-            </Button>
-            <Button
-              type="primary"
-              style={{ marginRight: 10 }}
-              disabled={!selectedRow}
-              onClick={this.handlePersist}
-            >
-              Persist
             </Button>
             <Button type="danger" onClick={() => this.handleDelete('', true)}>
               purge
@@ -205,10 +183,9 @@ class Nas extends Component {
         )}
         <Table
           rowKey="path"
-          rowSelection={this.rowSelection(uploaded)}
           pagination={false}
           dataSource={files}
-          columns={this.columns()}
+          columns={this.columns(uploaded)}
         />
       </Card>
     );
