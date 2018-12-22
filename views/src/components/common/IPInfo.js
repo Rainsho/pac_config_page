@@ -1,7 +1,7 @@
 import React from 'react';
 import { List } from 'antd';
 import { isIP } from '../../utils/util';
-import { Color } from './Color';
+import Color from './Color';
 
 const IPInfo = ({ s, t, i }) => {
   return (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tag } from 'antd';
 
-export class Color {
+export default class Color {
   static tag(color) {
     return ({ str, ...prop }) => (
       <Tag color={color} {...prop}>

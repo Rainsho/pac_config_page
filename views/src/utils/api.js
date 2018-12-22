@@ -42,3 +42,7 @@ export function getSDInfo(all = false) {
 export function persistFile(path) {
   return Request.put(`${SERVER}fs/ftpd`, { path });
 }
+
+export function getQueue() {
+  return Request.get(`${SERVER}fs/queue`);
+}

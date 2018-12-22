@@ -1,6 +1,6 @@
 import React from 'react';
 import { Row, Col, Switch } from 'antd';
-import { Color } from './Color';
+import Color from './Color';
 
 const PingInfo = ({ current, info, handleSwitch }) => {
   const { host, avg } = info;

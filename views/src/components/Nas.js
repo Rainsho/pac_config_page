@@ -1,23 +1,33 @@
 import React, { Component } from 'react';
-import { Card, Table, Button, Modal, Input, notification, Progress } from 'antd';
+import { Card, Table, Button, Modal, Input, notification, Progress, List } from 'antd';
 import io from 'socket.io-client';
-import { getFiles, deleteFile, renameFile, getDisk, persistFile } from '../utils/api';
+import { getFiles, deleteFile, renameFile, getDisk, persistFile, getQueue } from '../utils/api';
 import { fmtBytes } from '../utils/util';
 import config from '../utils/config';
+import { Uploaded } from './common';
 
 class Nas extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { files: [], disk: {}, file: '', percent: 0 };
+    this.state = { files: [], disk: {}, queue: [], file: '', percent: 0 };
 
     this.syncFiles = () => {
-      Promise.all([getFiles(), getDisk()]).then(([files, disk]) => this.setState({ files, disk }));
+      Promise.all([getFiles(), getDisk(), getQueue()]).then(([files, disk, queue]) =>
+        this.setState({ files, disk, queue })
+      );
     };
 
     this.io = io(config.SERVER);
 
     this.io.on('progress', ({ file, percent }) => this.setState({ file, percent }));
+
+    this.io.on('done', file => {
+      const queue = this.state.queue.slice();
+      queue.push(file);
+
+      this.setState({ queue });
+    });
   }
 
   componentDidMount() {
@@ -72,10 +82,11 @@ class Nas extends Component {
   };
 
   render() {
-    const { files, disk, file, percent } = this.state;
+    const { files, disk, queue, file, percent } = this.state;
     const { available: ava, total } = disk;
 
     const diskSize = ava ? ` (${fmtBytes(ava, 2)}/${fmtBytes(total, 2)})` : '';
+    const uploaded = queue.filter(x => x.state === 'done');
 
     const columns = [
       {
@@ -117,11 +128,18 @@ class Nas extends Component {
           </>
         }
       >
+        {uploaded.length > 0 && <Uploaded files={uploaded} />}
         {file && (
-          <>
-            <div>UPLOADING {file}</div>
-            <Progress style={{ marginBottom: 10 }} percent={parseInt(percent * 100, 10)} />
-          </>
+          <List
+            size="small"
+            bordered
+            style={{ marginBottom: 10 }}
+            header={<div>UPLOADING {file}</div>}
+          >
+            <List.Item>
+              <Progress percent={(percent * 100).toFixed(2)} />
+            </List.Item>
+          </List>
         )}
         <Table rowKey="path" pagination={false} dataSource={files} columns={columns} />
       </Card>

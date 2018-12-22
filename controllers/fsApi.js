@@ -1,10 +1,11 @@
-const { resolve } = require('path');
+const { resolve, basename } = require('path');
 const fs = require('fs-extra');
 const disk = require('diskusage');
 const constants = require('../constants');
 const { getAllFiles, beforePersist } = require('../utils/fsService');
+const { syncQueue } = require('../utils');
 
-const { nas: nasDir } = constants;
+const { nas: nasDir, db } = constants;
 
 module.exports = {
   'GET /fs/disk': async ctx => {
@@ -53,6 +54,15 @@ module.exports = {
     const file = resolve(nasDir, path);
     const desc = await beforePersist(file, ctx.io);
 
+    // desc stand for error
+    if (!desc) {
+      syncQueue(basename(file), { state: 'start' });
+    }
+
     ctx.body = { code: 200, desc };
+  },
+
+  'GET /fs/queue': async ctx => {
+    ctx.body = db.queue || [];
   },
 };

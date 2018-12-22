@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 const PromiseFtp = require('promise-ftp');
 const iconv = require('iconv-lite');
 const constants = require('../constants');
-const { now } = require('./index');
+const { now, syncQueue } = require('./index');
 
 const { nas: nasDir, ftpServer, ftpDir } = constants;
 const ftp = new PromiseFtp();
@@ -75,12 +75,17 @@ async function doPersist(ftp, file, io) {
     doneSize += buff.length;
 
     const percent = doneSize / size;
+    const { s, t } = now(false);
     const doneStone = mileStone.filter(x => x > percent);
+
+    if (percent === 1) {
+      syncQueue(fileName, { file, state: 'done', time: s });
+      io.emit('done', { id: fileName, file, state: 'done', time: s });
+    }
 
     if (mileStone.length > doneStone.length) {
       mileStone = doneStone;
 
-      const { s, t } = now(false);
       const cost = t - timer;
 
       console.log(fileName, cost, percent);
