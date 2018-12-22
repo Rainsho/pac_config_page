@@ -46,3 +46,7 @@ export function persistFile(path) {
 export function getQueue() {
   return Request.get(`${SERVER}fs/queue`);
 }
+
+export function cancelPersist(fileName) {
+  return Request.delete(`${SERVER}fs/ftpd`, { fileName });
+}

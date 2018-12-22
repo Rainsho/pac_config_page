@@ -1,7 +1,15 @@
 import React, { Component } from 'react';
 import { Card, Table, Button, Modal, Input, notification, Progress, List } from 'antd';
 import io from 'socket.io-client';
-import { getFiles, deleteFile, renameFile, getDisk, persistFile, getQueue } from '../utils/api';
+import {
+  getFiles,
+  deleteFile,
+  renameFile,
+  getDisk,
+  persistFile,
+  getQueue,
+  cancelPersist,
+} from '../utils/api';
 import { fmtBytes } from '../utils/util';
 import config from '../utils/config';
 import { Uploaded } from './common';
@@ -17,6 +25,7 @@ class Nas extends Component {
       file: '',
       percent: 0,
       selectedRow: '',
+      cancel: false,
     };
 
     this.syncFiles = () => {
@@ -81,12 +90,26 @@ class Nas extends Component {
       content: `Persist ${selectedRow} ?`,
       maskClosable: true,
       onOk: () => {
-        this.setState({ file: selectedRow.split('/').pop(), percent: 0, selectedRow: '' }, () => {
-          persistFile(selectedRow).then(({ desc }) => {
-            if (desc) notification.error({ message: desc.toString() });
-          });
-        });
+        this.setState(
+          {
+            file: selectedRow.split('/').pop(),
+            percent: 0,
+            selectedRow: '',
+            cancel: false,
+          },
+          () => {
+            persistFile(selectedRow).then(({ desc }) => {
+              if (desc) notification.error({ message: desc.toString() });
+            });
+          }
+        );
       },
+    });
+  };
+
+  handleCancel = fileName => {
+    cancelPersist(fileName).then(({ code }) => {
+      if (code === 200) this.setState({ cancel: true });
     });
   };
 
@@ -99,6 +122,7 @@ class Nas extends Component {
       disabled: uploaded.map(x => x.id).includes(name),
       name: path,
     }),
+    // selectedRowKeys: [this.state.selectedRow],
   });
 
   columns = () => [
@@ -126,7 +150,7 @@ class Nas extends Component {
   ];
 
   render() {
-    const { files, disk, queue, file, percent, selectedRow } = this.state;
+    const { files, disk, queue, file, percent, selectedRow, cancel } = this.state;
     const { available: ava, total } = disk;
 
     const diskSize = ava ? ` (${fmtBytes(ava, 2)}/${fmtBytes(total, 2)})` : '';
@@ -164,7 +188,18 @@ class Nas extends Component {
             header={<div>UPLOADING {file}</div>}
           >
             <List.Item>
-              <Progress percent={+(percent * 100).toFixed(2)} />
+              <Progress
+                percent={percent * 100}
+                format={per => (per === 100 ? '100%' : `${per.toFixed(2)}%`)}
+              />
+              <Button
+                shape="circle"
+                icon="close"
+                size="small"
+                disabled={!percent || percent >= 1 || cancel}
+                style={{ marginLeft: 30 }}
+                onClick={() => this.handleCancel(file)}
+              />
             </List.Item>
           </List>
         )}

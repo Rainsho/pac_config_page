@@ -67,4 +67,17 @@ module.exports = {
   'GET /fs/queue': async ctx => {
     ctx.body = db.queue || [];
   },
+
+  'DELETE /fs/ftpd': async ctx => {
+    const { fileName = '' } = ctx.request.body;
+    const info = db.queue.find(x => x.id === fileName);
+
+    if (info && typeof info.cancel === 'function') {
+      await info.cancel();
+      syncQueue(fileName, null, true);
+      ctx.body = { code: 200, desc: 'done' };
+    } else {
+      ctx.status = 204;
+    }
+  },
 };

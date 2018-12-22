@@ -71,8 +71,11 @@ async function doPersist(ftp, file, io) {
   let doneSize = 0;
   let timer = now(false).t;
   let mileStone = new Array(T).fill(0).map((x, i) => (i + 1) * (1 / T));
+  let cancel = false;
 
   stream.on('data', buff => {
+    if (cancel) return;
+
     doneSize += buff.length;
 
     const percent = doneSize / size;
@@ -92,6 +95,15 @@ async function doPersist(ftp, file, io) {
       console.log(fileName, cost, percent);
       io.emit('progress', { s, file: fileName, percent, cost });
     }
+  });
+
+  syncQueue(fileName, {
+    file,
+    state: 'uploading',
+    cancel: async () => {
+      cancel = true;
+      await ftp.end();
+    },
   });
 
   await ftp.put(stream, `${ftpDir}/${fileName}`);
