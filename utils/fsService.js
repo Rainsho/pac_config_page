@@ -45,6 +45,7 @@ async function beforePersist(file, io) {
       .map(({ name }) => iconv.decode(Buffer.from(name, 'binary'), 'utf-8'));
 
     if (names.includes(fileName)) {
+      io.emit('done', { id: fileName, file, state: 'done', time: 'NOT SURE' });
       throw new Error(`${fileName} may already persisted`);
     }
   } catch (e) {

@@ -10,12 +10,12 @@ const Uploaded = ({ files }) => {
       style={{ marginBottom: 10 }}
       header={<div>UPLOADED</div>}
       dataSource={files}
-      renderItem={({ id, time }) => (
+      renderItem={({ time, id }) => (
         <List.Item>
           <Color.LivingCoral str="time" />
           <span style={{ width: 160 }}>{time}</span>
           <Color.WhatBlue str="file" />
-          <span style={{ width: 160 }}>{id}</span>
+          <span>{id}</span>
         </List.Item>
       )}
     />

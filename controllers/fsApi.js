@@ -34,6 +34,7 @@ module.exports = {
 
     if (purge) {
       await fs.emptyDir(nasDir);
+      syncQueue();
       ctx.body = { code: 200, desc: 'purge done!' };
       return;
     }
@@ -42,6 +43,7 @@ module.exports = {
 
     if (path && fs.existsSync(file)) {
       await fs.remove(file);
+      syncQueue(basename(file), null, true);
       ctx.body = { code: 200, desc: 'delete done!' };
       return;
     }
