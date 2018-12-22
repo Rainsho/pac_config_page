@@ -64,7 +64,7 @@ class Nas extends Component {
       onOk: () => {
         this.setState({ file: path, percent: 0 }, () => {
           persistFile(path).then(({ desc }) => {
-            if (desc) notification.error({ message: desc });
+            if (desc) notification.error({ message: desc.toString() });
           });
         });
       },

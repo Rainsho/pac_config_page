@@ -1,6 +1,7 @@
 const { resolve, relative, basename } = require('path');
 const fs = require('fs-extra');
 const PromiseFtp = require('promise-ftp');
+const iconv = require('iconv-lite');
 const constants = require('../constants');
 const { now } = require('./index');
 
@@ -24,8 +25,10 @@ async function getAllFiles(dir) {
 }
 
 async function beforePersist(file, io) {
+  const fileName = basename(file);
+
   if (!fs.existsSync(file) || !io) {
-    return `${file} may not exists`;
+    return `${fileName} may not exists`;
   }
 
   await ftp.connect(ftpServer);
@@ -36,7 +39,17 @@ async function beforePersist(file, io) {
     if (!list || !list.length) {
       throw new Error('something wrong with the FTP server');
     }
+
+    const names = list
+      .filter(x => x.type !== 'd')
+      .map(({ name }) => iconv.decode(Buffer.from(name, 'binary'), 'utf-8'));
+
+    if (names.includes(fileName)) {
+      throw new Error(`${fileName} may already persisted`);
+    }
   } catch (e) {
+    await ftp.end();
+
     return e.message;
   }
 
