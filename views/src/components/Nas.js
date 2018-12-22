@@ -62,7 +62,7 @@ class Nas extends Component {
       content: `Persist ${path} ?`,
       maskClosable: true,
       onOk: () => {
-        this.setState({ file: path, percent: 0 }, () => {
+        this.setState({ file: path.split('/').pop(), percent: 0 }, () => {
           persistFile(path).then(({ desc }) => {
             if (desc) notification.error({ message: desc.toString() });
           });

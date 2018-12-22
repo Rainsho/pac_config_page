@@ -62,10 +62,14 @@ async function beforePersist(file, io) {
 async function doPersist(ftp, file, io) {
   const { size } = fs.statSync(file);
   const stream = fs.createReadStream(file);
+  const fileName = basename(file);
+
+  // emit progress every 5MB transfered
+  const T = Math.ceil(size / (5 * 1024 * 1024));
 
   let doneSize = 0;
   let timer = now(false).t;
-  let mileStone = new Array(50).fill(0).map((x, i) => (i + 1) * 0.02);
+  let mileStone = new Array(T).fill(0).map((x, i) => (i + 1) * (1 / T));
 
   stream.on('data', buff => {
     doneSize += buff.length;
@@ -77,13 +81,14 @@ async function doPersist(ftp, file, io) {
       mileStone = doneStone;
 
       const { s, t } = now(false);
+      const cost = t - timer;
 
-      console.log(basename(file), t - timer, percent);
-      io.emit('progress', { s, file, percent });
+      console.log(fileName, cost, percent);
+      io.emit('progress', { s, file: fileName, percent, cost });
     }
   });
 
-  await ftp.put(stream, `${ftpDir}/${basename(file)}`);
+  await ftp.put(stream, `${ftpDir}/${fileName}`);
   await ftp.end();
 }
 
