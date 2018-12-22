@@ -10,6 +10,18 @@ const _default = {
   nas: isDev ? '/Users/Rainsho/Downloads' : '/home/maru/nas',
   bakFile: resolve(__dirname, '_bak.json'),
   db: {},
+  keys: {
+    '192.168.0.0': {
+      port: 8080,
+      key: 'password',
+    },
+  },
+  ftpServer: {
+    host: '192.168.0.0',
+    user: 'username',
+    password: 'password',
+  },
+  ftpDir: '/path/to/write',
 };
 
 try {
