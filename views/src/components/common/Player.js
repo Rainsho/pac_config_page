@@ -7,6 +7,7 @@ class Player extends Component {
     return {
       autoplay: true,
       controls: true,
+      playbackRates: [0.5, 0.8, 1, 1.2, 2],
       sources: [{ src, type: 'video/mp4' }],
     };
   }
