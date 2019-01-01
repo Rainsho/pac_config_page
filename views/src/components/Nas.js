@@ -10,9 +10,9 @@ import {
   getQueue,
   cancelPersist,
 } from '../utils/api';
-import { fmtBytes } from '../utils/util';
+import { fmtBytes, shorterText } from '../utils/util';
 import config from '../utils/config';
-import { Uploaded } from './common';
+import { Uploaded, Player } from './common';
 
 class Nas extends Component {
   constructor(props) {
@@ -25,6 +25,8 @@ class Nas extends Component {
       file: '',
       percent: 0,
       cancel: false,
+      showVideo: false,
+      videoSrc: '',
     };
 
     this.syncFiles = () => {
@@ -110,13 +112,32 @@ class Nas extends Component {
     });
   };
 
+  handleVideo = path => {
+    this.setState({
+      showVideo: true,
+      videoSrc: `/nas/${path}`,
+    });
+  };
+
+  closeVideo = () => {
+    this.setState({ showVideo: false });
+  };
+
   columns = uploaded => [
     {
       title: 'name',
       dataIndex: 'name',
-      render: (val, { path }) => <a href={`/nas/${path}`}>{val}</a>,
+      render: (val, { path }) => (
+        <a href={`/nas/${path}`} title={val}>
+          {shorterText(val)}
+        </a>
+      ),
     },
-    { title: 'path', dataIndex: 'path' },
+    {
+      title: 'path',
+      dataIndex: 'path',
+      render: val => <span title={val}>{shorterText(val)}</span>,
+    },
     { title: 'size', dataIndex: 'size', align: 'right', render: val => fmtBytes(val) },
     {
       title: 'opt',
@@ -124,6 +145,11 @@ class Nas extends Component {
       render: (_, { path, name }) => (
         <Button.Group>
           <Button icon="edit" onClick={() => this.handleRename(path, name)} />
+          <Button
+            icon="video-camera"
+            disabled={!/\.mp4$/.exec(name)}
+            onClick={() => this.handleVideo(path)}
+          />
           <Button icon="delete" onClick={() => this.handleDelete(path)} />
           <Button
             icon="cloud-upload"
@@ -136,7 +162,7 @@ class Nas extends Component {
   ];
 
   render() {
-    const { files, disk, queue, file, percent, cancel } = this.state;
+    const { files, disk, queue, file, percent, cancel, showVideo, videoSrc } = this.state;
     const { available: ava, total } = disk;
 
     const diskSize = ava ? ` (${fmtBytes(ava, 2)}/${fmtBytes(total, 2)})` : '';
@@ -187,6 +213,15 @@ class Nas extends Component {
           dataSource={files}
           columns={this.columns(uploaded)}
         />
+        <Modal
+          width="90%"
+          destroyOnClose
+          footer={null}
+          visible={showVideo}
+          onCancel={this.closeVideo}
+        >
+          <Player src={videoSrc} />
+        </Modal>
       </Card>
     );
   }

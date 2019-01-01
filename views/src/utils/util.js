@@ -49,3 +49,15 @@ export class Request {
 export function isIP(str = '') {
   return /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.exec(str);
 }
+
+export function shorterText(str = '', len = 32) {
+  if (str.length < len) return str;
+
+  const fix = ~~(len / 2);
+  const key = (/S\d+E\d+/i.exec(str) || '') && /S\d+E\d+/i.exec(str)[0];
+
+  const pre = str.substr(0, fix);
+  const sub = str.substr(-fix);
+
+  return [pre, sub].some(x => x.includes(key)) ? `${pre}...${sub}` : `${pre}...${key}...${sub}`;
+}
