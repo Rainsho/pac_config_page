@@ -7,18 +7,18 @@ const PingInfo = ({ current, info, handleSwitch }) => {
 
   return (
     <Row type="flex" style={{ minHeight: 30 }}>
-      <Col sm={4} lg={2}>
+      <Col xs={6} sm={4} xl={3}>
         {current === host ? (
           <Switch checked />
         ) : (
           <Switch onClick={() => handleSwitch(current, host)} />
         )}
       </Col>
-      <Col sm={8} lg={4}>
+      <Col xs={16} sm={8} xl={6}>
         <Color.WhatBlue str="host" />
         {host}
       </Col>
-      <Col xs={24} sm={8} lg={4}>
+      <Col xs={{ offset: 6, span: 20 }} sm={{ offset: 0, span: 8 }} xl={6}>
         <Color.LivingCoral str="avg_ping" />
         {avg} ms
       </Col>
