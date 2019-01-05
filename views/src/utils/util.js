@@ -53,11 +53,11 @@ export function isIP(str = '') {
 export function shorterText(str = '', len = 32) {
   if (str.length < len) return str;
 
-  const fix = ~~(len / 2);
   const key = (/S\d+E\d+/i.exec(str) || '') && /S\d+E\d+/i.exec(str)[0];
+  const fix = key ? ~~(len / 2) - 6 : ~~(len / 2) - 2;
 
   const pre = str.substr(0, fix);
   const sub = str.substr(-fix);
 
-  return [pre, sub].some(x => x.includes(key)) ? `${pre}...${sub}` : `${pre}...${key}...${sub}`;
+  return [pre, sub].some(x => x.includes(key)) ? `${pre}....${sub}` : `${pre}...${key}...${sub}`;
 }

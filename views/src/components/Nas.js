@@ -115,7 +115,7 @@ class Nas extends Component {
   handleVideo = path => {
     this.setState({
       showVideo: true,
-      videoSrc: `/nas/${path}`,
+      videoSrc: `${config.NAS_SERVER}nas/${path}`,
     });
   };
 
@@ -128,7 +128,7 @@ class Nas extends Component {
       title: 'name',
       dataIndex: 'name',
       render: (val, { path }) => (
-        <a href={`/nas/${path}`} title={val}>
+        <a href={`${config.NAS_SERVER}nas/${path}`} title={val}>
           {shorterText(val)}
         </a>
       ),
