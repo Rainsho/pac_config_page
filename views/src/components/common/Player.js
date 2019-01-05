@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import videojs from 'video.js';
+
 import 'video.js/dist/video-js.css';
+import 'videojs-seek-buttons';
+import 'videojs-seek-buttons/dist/videojs-seek-buttons.css';
 
 class Player extends Component {
   defaultOptions(src) {
@@ -9,6 +12,9 @@ class Player extends Component {
       controls: true,
       playbackRates: [0.5, 0.8, 1, 1.2, 2],
       sources: [{ src, type: 'video/mp4' }],
+      plugins: {
+        seekButtons: { forward: 20, back: 10 },
+      },
     };
   }
 
