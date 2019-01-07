@@ -13,7 +13,7 @@ class Player extends Component {
       playbackRates: [0.5, 0.8, 1, 1.2, 2],
       sources: [{ src, type: 'video/mp4' }],
       plugins: {
-        seekButtons: { forward: 20, back: 10 },
+        seekButtons: { forward: 30, back: 10 },
       },
     };
   }
@@ -30,7 +30,7 @@ class Player extends Component {
 
   render() {
     return (
-      <div style={{ width: '100%' }} data-vjs-player>
+      <div style={{ width: '100%', maxHeight: '80vh' }} data-vjs-player>
         <video ref={el => (this.el = el)} className="video-js" />
       </div>
     );

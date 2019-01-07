@@ -216,6 +216,7 @@ class Nas extends Component {
         <Modal
           width="90%"
           destroyOnClose
+          centered
           footer={null}
           visible={showVideo}
           onCancel={this.closeVideo}
