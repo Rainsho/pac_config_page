@@ -25,7 +25,9 @@ const _default = {
 };
 
 try {
-  _default.db = require(_default.bakFile);
+  const { last, queue } = require(_default.bakFile);
+
+  _default.db = { last, queue };
 } catch (e) {
   console.warn(e);
 }
