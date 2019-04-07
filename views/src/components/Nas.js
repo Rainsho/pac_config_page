@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Table, Button, Modal, Input, notification, Progress, List } from 'antd';
+import { Card, Table, Button, Modal, Input, notification, Progress, List, message } from 'antd';
 import io from 'socket.io-client';
 import {
   getFiles,
@@ -84,6 +84,36 @@ class Nas extends Component {
     });
   };
 
+  handleTouchStart = e => {
+    this.touchX = e.changedTouches[0].clientX;
+  };
+
+  handleTouchMove = e => {
+    const { clientX } = e.changedTouches[0];
+
+    // move right, do nothing
+    if (clientX > this.touchX) return;
+
+    if (this.touchX - clientX > 60) {
+      e.target.style.color = '#d9d9d9';
+    } else {
+      e.target.style.color = '';
+    }
+  };
+
+  handleTocuhEnd = (path, e) => {
+    const { clientX } = e.changedTouches[0];
+
+    if (this.touchX - clientX > 60) {
+      const hide = message.loading(`Deleting ${path}`);
+
+      deleteFile(path)
+        .then(this.syncFiles)
+        .then(hide)
+        .then(() => message.success('Deleted!', 1));
+    }
+  };
+
   handlePersist = path => {
     Modal.confirm({
       content: `Persist ${path} ?`,
@@ -136,7 +166,16 @@ class Nas extends Component {
     {
       title: 'path',
       dataIndex: 'path',
-      render: val => <span title={val}>{shorterText(val)}</span>,
+      render: (val, { path }) => (
+        <div
+          title={val}
+          onTouchStart={this.handleTouchStart}
+          onTouchMove={this.handleTouchMove}
+          onTouchEnd={e => this.handleTocuhEnd(path, e)}
+        >
+          {shorterText(val)}
+        </div>
+      ),
     },
     { title: 'size', dataIndex: 'size', align: 'right', render: val => fmtBytes(val) },
     {
