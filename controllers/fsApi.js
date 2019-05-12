@@ -1,7 +1,7 @@
 const { resolve, basename } = require('path');
 const fs = require('fs-extra');
 const disk = require('diskusage');
-formidable = require('formidable');
+const formidable = require('formidable');
 const constants = require('../constants');
 const { getAllFiles, beforePersist } = require('../utils/fsService');
 const { syncQueue } = require('../utils');
