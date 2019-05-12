@@ -1,5 +1,4 @@
 const fs = require('fs-extra');
-const path = require('path');
 const { db, bakFile } = require('../constants');
 const { now } = require('../utils');
 

@@ -4,14 +4,13 @@
   "description": "pac_config_tool",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "export NODE_ENV=production && node index.js",
-    "dev": "export NODE_ENV=development && node index.js",
-    "watch": "export NODE_ENV=development && supervisor index.js",
+    "start": "export NODE_ENV=production && node server/index.js",
+    "dev": "export NODE_ENV=development && node server/index.js",
+    "watch": "export NODE_ENV=development && supervisor server/index.js",
     "build": "cd views && npm run build",
     "deploy": "npm run deploy:views && npm run deploy:secret",
     "deploy:views": "scp -r views/build maru@192.168.100.200:App/pac/views",
-    "deploy:secret": "scp constants/_secret.js maru@192.168.100.200:App/pac/constants"
+    "deploy:secret": "scp server/constants/_secret.js maru@192.168.100.200:App/pac/constants"
   },
   "author": "Rainsho",
   "license": "ISC",
