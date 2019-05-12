@@ -1,6 +1,7 @@
 const { resolve, basename } = require('path');
 const fs = require('fs-extra');
 const disk = require('diskusage');
+formidable = require('formidable');
 const constants = require('../constants');
 const { getAllFiles, beforePersist } = require('../utils/fsService');
 const { syncQueue } = require('../utils');
@@ -76,6 +77,46 @@ module.exports = {
       await info.cancel();
       syncQueue(fileName, null, true);
       ctx.body = { code: 200, desc: 'done' };
+    } else {
+      ctx.status = 204;
+    }
+  },
+
+  'POST /fs/upload': async ctx => {
+    const [err, , files] = await new Promise(res => {
+      const form = new formidable.IncomingForm({ maxFileSize: 2 ** 31 }); // ~ 2G
+
+      let fileInfo = { p: 0 };
+
+      form
+        .on('fileBegin', (_, file) => {
+          fileInfo = file;
+          fileInfo.p = 0;
+        })
+        .on('progress', (rec, exp) => {
+          const p = rec / exp;
+
+          if (p === 1 || p - fileInfo.p > 0.02) {
+            fileInfo.p = p;
+
+            ctx.io.emit('upload', { file: fileInfo.name, percent: p });
+          }
+        })
+        .on('file', (_, file) => {
+          const { name, path } = file;
+          const dest = resolve(constants.nas, name);
+
+          fs.moveSync(path, dest, { overwrite: true });
+        })
+        .on('error', err => {
+          res(err);
+        });
+
+      form.parse(ctx.req, (...args) => res(args));
+    });
+
+    if (!err && files && files.file) {
+      ctx.body = { code: 200, desc: `${files.file.name} done!` };
     } else {
       ctx.status = 204;
     }
