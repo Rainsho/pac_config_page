@@ -12,7 +12,7 @@ import {
 } from '../utils/api';
 import { fmtBytes, shorterText } from '../utils/util';
 import config from '../utils/config';
-import { Uploaded, Player } from './common';
+import { Uploaded, Player, Dragger } from './common';
 
 class Nas extends Component {
   constructor(props) {
@@ -246,6 +246,7 @@ class Nas extends Component {
             </List.Item>
           </List>
         )}
+        <Dragger io={this.io} />
         <Table
           rowKey="path"
           pagination={false}
