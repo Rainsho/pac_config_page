@@ -96,7 +96,7 @@ module.exports = {
         .on('progress', (rec, exp) => {
           const p = rec / exp;
 
-          if (p === 1 || p - fileInfo.p > 0.02) {
+          if (fileInfo.name && p - fileInfo.p > 0.02) {
             fileInfo.p = p;
 
             ctx.io.emit('upload', { file: fileInfo.name, percent: p });
@@ -107,6 +107,9 @@ module.exports = {
           const dest = resolve(constants.nas, name);
 
           fs.moveSync(path, dest, { overwrite: true });
+        })
+        .on('end', () => {
+          ctx.io.emit('upload', { file: fileInfo.name, percent: 1 });
         })
         .on('error', err => {
           res(err);
