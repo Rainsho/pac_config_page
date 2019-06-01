@@ -28,7 +28,7 @@ app.use(async (ctx, next) => {
 });
 
 // enable cors
-app.use(cors());
+app.use(cors({ credentials: true }));
 
 // parse request body:
 app.use(bodyParser());

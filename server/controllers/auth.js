@@ -16,13 +16,10 @@ module.exports = {
     if (code === jwtCode) {
       const token = sign({ ip: ctx.ip }, secret, { expiresIn: '7d' });
 
-      console.log(code);
-      console.log(token);
-
       ctx.cookies.set(cookie, token);
       ctx.body = { ip: ctx.ip, token };
     } else {
-      ctx.status = 401;
+      ctx.status = 403;
       ctx.body = 'Wrong code!!!';
     }
   },

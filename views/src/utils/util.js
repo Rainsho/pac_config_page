@@ -1,4 +1,8 @@
-import { notification } from 'antd';
+import React from 'react';
+import { notification, Modal, Input } from 'antd';
+import config from './config';
+
+const temp = { code: '' };
 
 export function fmtBytes(bytes, prec = 3) {
   if (Number.isNaN(parseInt(bytes, 10))) return bytes;
@@ -13,6 +17,26 @@ export function fmtBytes(bytes, prec = 3) {
 }
 
 function checkStatus(response) {
+  if (response.status === 401) {
+    notification.warning({
+      message: 'This operation need Authorization!!!',
+    });
+
+    Modal.confirm({
+      title: 'Enter the authorization code:',
+      content: <Input type="password" onChange={e => (temp.code = e.target.value)} />,
+      onOk: () => Request.post(`${config.SERVER}auth`, { code: temp.code }),
+    });
+
+    return Promise.reject();
+  }
+
+  if (response.status === 403) {
+    notification.error({ message: 'Wrong code!!!' });
+
+    return Promise.reject();
+  }
+
   if (response.status !== 200) {
     notification.warning({
       message: `Got status ${response.status}`,
@@ -32,6 +56,7 @@ export class Request {
   static async put(url, body) {
     return fetch(url, {
       method: 'PUT',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     }).then(checkStatus);
@@ -40,6 +65,16 @@ export class Request {
   static async delete(url, body) {
     return fetch(url, {
       method: 'DELETE',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(checkStatus);
+  }
+
+  static async post(url, body) {
+    return fetch(url, {
+      method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     }).then(checkStatus);
