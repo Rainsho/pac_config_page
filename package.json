@@ -10,7 +10,7 @@
     "build": "cd views && npm run build",
     "deploy": "npm run deploy:views && npm run deploy:secret",
     "deploy:views": "scp -r views/build maru@192.168.100.200:App/pac/views",
-    "deploy:secret": "scp server/constants/_secret.js maru@192.168.100.200:App/pac/constants"
+    "deploy:secret": "scp server/constants/_secret.js maru@192.168.100.200:App/pac/server/constants"
   },
   "author": "Rainsho",
   "license": "ISC",
