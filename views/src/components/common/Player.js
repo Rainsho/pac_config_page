@@ -3,7 +3,8 @@ import videojs from 'video.js';
 
 import 'video.js/dist/video-js.css';
 import 'videojs-seek-buttons';
-import 'videojs-seek-buttons/dist/videojs-seek-buttons.css';
+// import 'videojs-seek-buttons/dist/videojs-seek-buttons.css';
+import './styles/videojs-seek.css';
 
 class Player extends Component {
   defaultOptions(src) {
