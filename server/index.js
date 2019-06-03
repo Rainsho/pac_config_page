@@ -13,7 +13,7 @@ const app = new Koa();
 
 // log request URL:
 app.use(async (ctx, next) => {
-  console.log(now(), `Process ${ctx.request.method} ${ctx.request.url}...`);
+  const { s, t } = now(false);
 
   try {
     await next();
@@ -25,6 +25,12 @@ app.use(async (ctx, next) => {
       throw e;
     }
   }
+
+  const { method, url, ip, type, length } = ctx.request;
+
+  console.log(s, 'Request from:', ip);
+  console.log('  -->', method, url, type, length);
+  console.log('  <--', method, url, ctx.status, now(false).t - t, ctx.length);
 });
 
 // enable cors
