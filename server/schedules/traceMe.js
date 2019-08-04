@@ -14,23 +14,17 @@ function traceMe() {
 
   Promise.race(urls.map(url => fetch(url, { headers: { 'User-Agent': ua } })))
     .then(x => x.text())
-    .then(res => {
-      const ip = res.trim();
-
-      if (!last.includes(ip)) {
-        last.push(ip);
+    .then(res => res.trim())
+    .catch(e => e.code)
+    .then(ipOrErr => {
+      if (!last.includes(ipOrErr)) {
+        last.push(ipOrErr);
 
         // keep two recently values
         if (last.length > 2) last.shift();
 
         db.last = last;
-        db[time] = { s: timer, t: now(), i: ip };
-      }
-    })
-    .catch(e => {
-      if (last !== e.code) {
-        db.last = e.code;
-        db[time] = { s: timer, t: now(), i: e.code };
+        db[time] = { s: timer, t: now(), i: ipOrErr };
       }
     });
 }
