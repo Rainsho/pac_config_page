@@ -8,7 +8,7 @@ const ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (
 
 function traceMe() {
   const { t: time, s: timer } = now(false);
-  const last = db.last || '';
+  const last = [].concat(db.last);
 
   console.log(timer, 'doing traceMe');
 
@@ -17,8 +17,13 @@ function traceMe() {
     .then(res => {
       const ip = res.trim();
 
-      if (last !== ip) {
-        db.last = ip;
+      if (!last.includes(ip)) {
+        last.push(ip);
+
+        // keep two recently values
+        if (last.length > 2) last.shift();
+
+        db.last = last;
         db[time] = { s: timer, t: now(), i: ip };
       }
     })
