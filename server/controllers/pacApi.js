@@ -46,7 +46,7 @@ module.exports = {
     // write config to 'target'
     // so I just need to update origin
     let data = fs.readFileSync(origin, 'ASCII');
-    data = data.replace('192.168.100.200', ip);
+    data = data.replace('10.0.0.22', ip);
     fs.writeFileSync(target, data);
 
     ctx.body = { onServer: ip, onFile: ip };
