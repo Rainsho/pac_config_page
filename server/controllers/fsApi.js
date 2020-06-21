@@ -58,9 +58,10 @@ module.exports = {
     const desc = await beforePersist(file, ctx.io);
 
     // desc stand for error
-    if (!desc) {
-      syncQueue(basename(file), { state: 'start' });
-    }
+    // WTF: if there is an error, why code 200?!
+    // if (!desc) {
+    //   syncQueue(basename(file), { state: 'enqueue' });
+    // }
 
     ctx.body = { code: 200, desc };
   },

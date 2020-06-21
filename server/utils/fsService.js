@@ -6,7 +6,7 @@ const constants = require('../constants');
 const { now, syncQueue } = require('./index');
 
 const { nas: nasDir, ftpServer, ftpDir } = constants;
-const ftp = new PromiseFtp();
+const ftp_jobs = { current: null, queue: [] };
 
 async function getAllFiles(dir) {
   const subdirs = (await fs.readdir(dir)).filter(x => !x.startsWith('.'));
@@ -31,6 +31,11 @@ async function beforePersist(file, io) {
     return `${fileName} may not exists`;
   }
 
+  if (ftp_jobs.queue.includes(file)) {
+    return `${fileName} is in the queue, just wait`;
+  }
+
+  const ftp = new PromiseFtp();
   await ftp.connect(ftpServer);
 
   try {
@@ -49,18 +54,34 @@ async function beforePersist(file, io) {
       throw new Error(`${fileName} may already persisted`);
     }
   } catch (e) {
-    await ftp.end();
-
     return e.message;
+  } finally {
+    await ftp.end();
   }
 
+  ftp_jobs.queue.push(file);
+  syncQueue(fileName, { state: 'enqueue' });
+
   // do not wait
-  doPersist(ftp, file, io);
+  doPersist(io);
 
   return '';
 }
 
-async function doPersist(ftp, file, io) {
+async function doPersist(io) {
+  if (ftp_jobs.current) return;
+
+  const file = ftp_jobs.queue.shift();
+
+  if (!file) return;
+
+  const ftpStatus = new Promise(res => {
+    ftp_jobs.current = res;
+  });
+
+  const ftp = new PromiseFtp();
+  await ftp.connect(ftpServer);
+
   const { size } = fs.statSync(file);
   const stream = fs.createReadStream(file);
   const fileName = basename(file);
@@ -102,12 +123,20 @@ async function doPersist(ftp, file, io) {
     state: 'uploading',
     cancel: async () => {
       cancel = true;
-      await ftp.end();
+
+      ftp_jobs.current && ftp_jobs.current();
+      ftp_jobs.current = null;
     },
   });
 
-  await ftp.put(stream, `${ftpDir}/${fileName}`);
+  // call `ftp.end` in `cancel` will make `put` pending forever
+  await Promise.race([ftp.put(stream, `${ftpDir}/${fileName}`), ftpStatus]);
   await ftp.end();
+
+  ftp_jobs.current && ftp_jobs.current();
+  ftp_jobs.current = null;
+
+  doPersist(io);
 }
 
 module.exports = { getAllFiles, beforePersist, doPersist };
