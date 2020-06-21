@@ -35,6 +35,10 @@ async function beforePersist(file, io) {
     return `${fileName} is in the queue, just wait`;
   }
 
+  if (ftp_jobs.current && ftp_jobs.current.file === file) {
+    return `${fileName} is in the queue, just wait`;
+  }
+
   const ftp = new PromiseFtp();
   await ftp.connect(ftpServer);
 
@@ -77,6 +81,7 @@ async function doPersist(io) {
 
   const ftpStatus = new Promise(res => {
     ftp_jobs.current = res;
+    ftp_jobs.current.file = file;
   });
 
   const ftp = new PromiseFtp();
