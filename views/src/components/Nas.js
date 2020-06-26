@@ -14,6 +14,8 @@ import { fmtBytes, shorterText } from '../utils/util';
 import config from '../utils/config';
 import { Uploaded, Player, Dragger } from './common';
 
+const LEFT_DELETE_PIXEL = 120;
+
 class Nas extends Component {
   constructor(props) {
     super(props);
@@ -27,6 +29,7 @@ class Nas extends Component {
       cancel: false,
       showVideo: false,
       videoSrc: '',
+      selectedFiles: [],
     };
 
     this.syncFiles = () => {
@@ -94,7 +97,7 @@ class Nas extends Component {
     // move right, do nothing
     if (clientX > this.touchX) return;
 
-    if (this.touchX - clientX > 60) {
+    if (this.touchX - clientX > LEFT_DELETE_PIXEL) {
       e.target.style.color = '#d9d9d9';
     } else {
       e.target.style.color = '';
@@ -104,7 +107,7 @@ class Nas extends Component {
   handleTocuhEnd = (path, e) => {
     const { clientX } = e.changedTouches[0];
 
-    if (this.touchX - clientX > 60) {
+    if (this.touchX - clientX > LEFT_DELETE_PIXEL) {
       const hide = message.loading(`Deleting ${path}`);
 
       deleteFile(path)
@@ -123,7 +126,6 @@ class Nas extends Component {
           {
             file: path.split('/').pop(),
             percent: 0,
-            selectedRow: '',
             cancel: false,
           },
           () => {
@@ -146,6 +148,41 @@ class Nas extends Component {
     this.setState({
       showVideo: true,
       videoSrc: `${config.NAS_SERVER}nas/${path}`,
+    });
+  };
+
+  handleBatchDelete = () => {
+    const { selectedFiles } = this.state;
+    const content = `Delete [${selectedFiles.join(', ')}] ?`;
+
+    Modal.confirm({
+      content,
+      maskClosable: true,
+      onOk: () =>
+        Promise.all(selectedFiles.map(x => deleteFile(x, false)))
+          .then(this.syncFiles)
+          .then(() => this.setState({ selectedFiles: [] })),
+    });
+  };
+
+  handleBatchPersist = () => {
+    const { selectedFiles } = this.state;
+    const content = `Persist [${selectedFiles.join(', ')}] ?`;
+
+    Modal.confirm({
+      content,
+      maskClosable: true,
+      onOk: () =>
+        Promise.all(selectedFiles.map(persistFile))
+          .then(responses => {
+            const desc = responses
+              .map(x => x.desc)
+              .filter(Boolean)
+              .join(',');
+
+            if (desc) notification.error({ message: desc.toString() });
+          })
+          .then(() => this.setState({ selectedFiles: [] })),
     });
   };
 
@@ -201,11 +238,27 @@ class Nas extends Component {
   ];
 
   render() {
-    const { files, disk, queue, file, percent, cancel, showVideo, videoSrc } = this.state;
+    const {
+      files,
+      disk,
+      queue,
+      file,
+      percent,
+      cancel,
+      showVideo,
+      videoSrc,
+      selectedFiles,
+    } = this.state;
     const { available: ava, total } = disk;
 
     const diskSize = ava ? ` (${fmtBytes(ava, 2)}/${fmtBytes(total, 2)})` : '';
     const uploaded = queue.filter(x => x.state === 'done');
+    const rowSelection = {
+      selectedRowKeys: selectedFiles,
+      onChange: selectedRowKeys => {
+        this.setState({ selectedFiles: selectedRowKeys });
+      },
+    };
 
     return (
       <Card
@@ -216,8 +269,22 @@ class Nas extends Component {
             <Button type="primary" style={{ marginRight: 10 }} onClick={this.syncFiles}>
               sync
             </Button>
-            <Button type="danger" onClick={() => this.handleDelete('', true)}>
+            <Button
+              type="danger"
+              style={{ marginRight: 10 }}
+              onClick={() => this.handleDelete('', true)}
+            >
               purge
+            </Button>
+            <Button
+              style={{ marginRight: 10 }}
+              disabled={selectedFiles.length === 0}
+              onClick={this.handleBatchDelete}
+            >
+              delete
+            </Button>
+            <Button disabled={selectedFiles.length === 0} onClick={this.handleBatchPersist}>
+              persist
             </Button>
           </>
         }
@@ -252,6 +319,7 @@ class Nas extends Component {
           pagination={false}
           dataSource={files}
           columns={this.columns(uploaded)}
+          rowSelection={rowSelection}
         />
         <Modal
           width="90%"
