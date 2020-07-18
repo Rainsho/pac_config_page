@@ -2,11 +2,9 @@ const { resolve, basename, relative } = require('path');
 const fs = require('fs-extra');
 const disk = require('diskusage');
 const formidable = require('formidable');
-const constants = require('../constants');
+const { nas: nasDir, db } = require('../constants');
 const { getAllFiles, beforePersist } = require('../utils/fsService');
 const { syncQueue } = require('../utils');
-
-const { nas: nasDir, db } = constants;
 
 module.exports = {
   'GET /fs/disk': async ctx => {
@@ -29,8 +27,8 @@ module.exports = {
     const target = resolve(oldFile, '..', name);
 
     if (relative(nasDir, target).startsWith('..')) {
-      ctx.body = 'illegal operate';
       ctx.status = 403;
+      ctx.body = 'illegal operate';
       return;
     }
 

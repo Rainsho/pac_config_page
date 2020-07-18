@@ -3,7 +3,9 @@ const { resolve } = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 
 const _default = {
-  nas: isDev ? '/Users/Rainsho/Downloads' : '/home/maru/nas',
+  nas: isDev ? '/Users/rainsho/Downloads' : '/home/maru/nas',
+  v2rayConfig: isDev ? '/Users/rainsho/Downloads/v2ray.json' : '/home/maru/configs/v2ray.json',
+  v2rayServers: resolve(__dirname, '_servers.json'),
 
   // should persist
   db: {},
