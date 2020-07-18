@@ -1,8 +1,6 @@
 const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const cors = require('@koa/cors');
-const serve = require('koa-static');
-const { resolve } = require('path');
 const jwt = require('koa-jwt');
 const controller = require('./controller');
 const { now } = require('./utils');
@@ -44,9 +42,6 @@ app.use(jwt(jwtOptions).unless(auth.BYPASS));
 
 // add controller:
 app.use(controller());
-
-// add static files
-app.use(serve(resolve(__dirname, '../views/build')));
 
 // engage socket.io
 const server = require('http').createServer(app.callback());
