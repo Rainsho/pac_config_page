@@ -1,4 +1,4 @@
-const { resolve, basename } = require('path');
+const { resolve, basename, relative } = require('path');
 const fs = require('fs-extra');
 const disk = require('diskusage');
 const formidable = require('formidable');
@@ -26,7 +26,15 @@ module.exports = {
       return;
     }
 
-    await fs.move(oldFile, resolve(oldFile, '..', name), { overwrite: true });
+    const target = resolve(oldFile, '..', name);
+
+    if (relative(nasDir, target).startsWith('..')) {
+      ctx.body = 'illegal operate';
+      ctx.status = 403;
+      return;
+    }
+
+    await fs.move(oldFile, target, { overwrite: true });
     ctx.body = { code: 200, desc: 'put done!' };
   },
 
@@ -105,7 +113,7 @@ module.exports = {
         })
         .on('file', (_, file) => {
           const { name, path } = file;
-          const dest = resolve(constants.nas, name);
+          const dest = resolve(nasDir, name);
 
           fs.moveSync(path, dest, { overwrite: true });
         })
