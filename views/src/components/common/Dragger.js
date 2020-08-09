@@ -5,7 +5,7 @@ import config from '../../utils/config';
 const uploadProps = {
   multiple: true,
   showUploadList: false,
-  action: `${config.SERVER}fs/upload`,
+  action: `${config.API_SERVER}fs/upload`,
   onChange(info) {
     const status = info.file.status;
 

@@ -25,7 +25,7 @@ function checkStatus(response) {
     Modal.confirm({
       title: 'Enter the authorization code:',
       content: <Input type="password" onChange={e => (temp.code = e.target.value)} />,
-      onOk: () => Request.post(`${config.SERVER}auth`, { code: temp.code }),
+      onOk: () => Request.post(`${config.API_SERVER}auth`, { code: temp.code }),
     });
 
     return Promise.reject();
