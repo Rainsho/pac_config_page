@@ -1,4 +1,5 @@
 const { db } = require('../constants');
+const v2rayUtils = require('./v2ray');
 
 function now(str = true) {
   const t = new Date();
@@ -28,4 +29,4 @@ function syncQueue(id, info = {}, purge = false) {
   return db.queue;
 }
 
-module.exports = { now, syncQueue };
+module.exports = { now, syncQueue, ...v2rayUtils };

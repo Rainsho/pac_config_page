@@ -1,7 +1,9 @@
 const fs = require('fs-extra');
 const ping = require('ping');
+const { exec } = require('child_process');
 
 const { v2rayServers, v2rayConfig } = require('../constants');
+const { updateV2rayConfig } = require('../utils');
 
 module.exports = {
   'GET /pac/ping': async ctx => {
@@ -63,6 +65,44 @@ module.exports = {
       console.log(e);
       ctx.status = 403;
       ctx.body = 'illeal vmess server string';
+    }
+  },
+
+  'PUT /pac/v2ray': async ctx => {
+    const { ps } = ctx.request.body;
+
+    if (!ps || !fs.existsSync(v2rayServers) || !fs.existsSync(v2rayConfig)) {
+      ctx.status = 204;
+      return;
+    }
+
+    const servers = await fs.readJson(v2rayServers);
+    const config = await fs.readJson(v2rayConfig);
+    const tServer = servers.find(x => x.ps === ps);
+
+    if (!tServer) {
+      ctx.status = 416;
+      return;
+    }
+
+    const tConfig = updateV2rayConfig(config, tServer);
+
+    await fs.writeJson(v2rayConfig, tConfig, { spaces: 2 });
+
+    if (process.env.NODE_ENV === 'production') {
+      exec('pm2 restart v2ray', (e, out, err) => {
+        if (e) {
+          console.log(e);
+          ctx.status = 400;
+          ctx.body = err;
+          return;
+        }
+
+        console.log(out);
+        ctx.body = { current: ps };
+      });
+    } else {
+      ctx.body = { current: ps };
     }
   },
 };
