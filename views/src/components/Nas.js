@@ -38,7 +38,7 @@ class Nas extends Component {
       );
     };
 
-    this.io = io(config.API_SERVER);
+    this.io = io(config.API_SERVER, { path: config.IO_PATH });
 
     this.io.on('progress', ({ file, percent }) => this.setState({ file, percent }));
 
