@@ -1,44 +1,63 @@
-import React, { Component } from 'react';
-import { Card, Button } from 'antd';
-import { updateAddress, getAddress, getPing, updateConfig } from '../utils/api';
-import { PingInfo, ConfigInfo } from './common';
+import React, { PureComponent, createRef } from 'react';
+import { Card, Button, Input, message } from 'antd';
+import { getPings, getAriports, updateAirport, flushAirports } from '../utils/api';
+import { PingInfo } from './common';
 
-class Pac extends Component {
+class Pac extends PureComponent {
   state = {
     loading: true,
     updating: false,
-    address: {},
-    currentHost: '',
-    pingInfo: [],
+    current: null,
+    servers: [],
+    pingInfos: {},
   };
 
+  el = createRef(null);
+
   componentDidMount() {
-    getAddress().then(address => this.setState({ address, loading: false }));
+    this.getServers();
   }
 
-  updateAddress = () => {
-    // it's fast, do not need show loading
-    updateAddress().then(address => this.setState({ address }));
+  getServers = () => {
+    getAriports().then(({ current, servers }) =>
+      this.setState({ current, servers, loading: false })
+    );
   };
 
   handlePing = () => {
     this.setState({ updating: true }, () => {
-      getPing().then(({ currentHost, pingInfo }) =>
-        this.setState({ currentHost, pingInfo, updating: false })
-      );
+      getPings().then((pings = []) => {
+        const pingInfos = pings.reduce((info, res) => Object.assign(info, { [res.ps]: res }), {});
+        this.setState({ pingInfos, updating: false });
+      });
     });
   };
 
-  switchServer = (cur, min) => {
+  switchServer = ps => {
+    if (this.state.updating) return;
+
     this.setState({ updating: true }, () => {
-      updateConfig(cur, min).then(({ currentHost }) => {
-        this.setState({ currentHost, updating: false });
+      updateAirport(ps).then(({ current }) => {
+        this.setState({ current, updating: false });
+      });
+    });
+  };
+
+  flushConfig = () => {
+    const vmess = (this.el.current.state.value || '').trim();
+
+    if (!vmess) return;
+
+    this.setState({ updating: true }, () => {
+      flushAirports(vmess).then(({ servers }) => {
+        message.success(`updated ${servers.length} servers`);
+        this.setState({ updating: false, servers });
       });
     });
   };
 
   render() {
-    const { loading, updating, address, currentHost, pingInfo } = this.state;
+    const { loading, updating, current, servers, pingInfos } = this.state;
 
     return (
       <Card
@@ -58,22 +77,31 @@ class Pac extends Component {
           </>
         }
       >
-        <Card title="Pac Config Info">
-          <ConfigInfo updating={updating} address={address} updateAddress={this.updateAddress} />
-        </Card>
-        <Card
-          title="Server Ping Info"
-          loading={updating}
-          style={{ marginTop: 16, display: pingInfo.length ? 'block' : 'none' }}
-        >
-          {pingInfo.map(info => (
+        <Card title="Airports Info" style={{ display: servers.length ? 'block' : 'none' }}>
+          {servers.map(({ ps }) => (
             <PingInfo
-              key={info.host}
-              current={currentHost}
-              info={info}
+              key={ps}
+              current={current}
+              ps={ps}
+              pingInfo={pingInfos[ps]}
               handleSwitch={this.switchServer}
             />
           ))}
+        </Card>
+        <Card title="Update List" style={{ marginTop: 16 }}>
+          <Button
+            type="danger"
+            loading={updating}
+            onClick={this.flushConfig}
+            style={{ marginBottom: 10 }}
+          >
+            update list
+          </Button>
+          <Input.TextArea
+            ref={this.el}
+            placeholder="base64:vmess"
+            autoSize={{ minRows: 3, maxRows: 10 }}
+          />
         </Card>
       </Card>
     );

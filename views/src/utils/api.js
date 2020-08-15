@@ -19,20 +19,20 @@ export function deleteFile(path, purge) {
   return Request.delete(`${API_SERVER}fs/file`, { path, purge });
 }
 
-export function getAddress() {
-  return Request.get(`${API_SERVER}pac/address`);
-}
-
-export function updateAddress() {
-  return Request.put(`${API_SERVER}pac/address`);
-}
-
-export function getPing() {
+export function getPings() {
   return Request.get(`${API_SERVER}pac/ping`);
 }
 
-export function updateConfig(cur, min) {
-  return Request.put(`${API_SERVER}pac/config`, { cur, min });
+export async function getAriports() {
+  return Request.get(`${API_SERVER}pac/v2ray`);
+}
+
+export async function flushAirports(vmess) {
+  return Request.post(`${API_SERVER}pac/v2ray`, { vmess });
+}
+
+export async function updateAirport(ps) {
+  return Request.put(`${API_SERVER}pac/v2ray`, { ps });
 }
 
 export function getSDInfo(all = false) {

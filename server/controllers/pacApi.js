@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
 const ping = require('ping');
-const { exec } = require('child_process');
+const { execSync } = require('child_process');
 
 const { v2rayServers, v2rayConfig } = require('../constants');
 const { updateV2rayConfig } = require('../utils');
@@ -60,7 +60,7 @@ module.exports = {
 
       await fs.writeJson(v2rayServers, servers, { spaces: 2 });
 
-      ctx.body = { code: 200, desc: `updated ${servers.length} servers` };
+      ctx.body = { servers: servers.map(x => ({ ps: x.ps })) };
     } catch (e) {
       console.log(e);
       ctx.status = 403;
@@ -90,17 +90,14 @@ module.exports = {
     await fs.writeJson(v2rayConfig, tConfig, { spaces: 2 });
 
     if (process.env.NODE_ENV === 'production') {
-      exec('pm2 restart v2ray', (e, out, err) => {
-        if (e) {
-          console.log(e);
-          ctx.status = 400;
-          ctx.body = err;
-          return;
-        }
-
-        console.log(out);
+      try {
+        execSync('pm2 restart v2ray', { encoding: 'utf-8' });
         ctx.body = { current: ps };
-      });
+      } catch (e) {
+        console.log(e);
+        ctx.status = 400;
+        ctx.body = e;
+      }
     } else {
       ctx.body = { current: ps };
     }

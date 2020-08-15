@@ -20,4 +20,6 @@ export default class Color {
 
   // just seems nice with LivingCoral
   static WhatBlue = Color.tag('#34e1e6');
+
+  static Black = Color.tag('#000');
 }
