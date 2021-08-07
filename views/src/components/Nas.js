@@ -1,5 +1,15 @@
 import React, { Component } from 'react';
-import { Card, Table, Button, Modal, Input, notification, Progress, List, message } from 'antd';
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Input,
+  notification,
+  Progress,
+  List,
+  message,
+} from 'antd';
 import io from 'socket.io-client';
 import {
   getFiles,
@@ -33,16 +43,18 @@ class Nas extends Component {
     };
 
     this.syncFiles = () => {
-      Promise.all([getFiles(), getDisk(), getQueue()]).then(([files, disk, queue]) =>
-        this.setState({ files, disk, queue })
+      Promise.all([getFiles(), getDisk(), getQueue()]).then(
+        ([files, disk, queue]) => this.setState({ files, disk, queue })
       );
     };
 
-    this.io = io(config.API_SERVER, { path: config.IO_PATH });
+    this.io = io(config.IO_PATH);
 
-    this.io.on('progress', ({ file, percent }) => this.setState({ file, percent }));
+    this.io.on('progress', ({ file, percent }) =>
+      this.setState({ file, percent })
+    );
 
-    this.io.on('done', file => {
+    this.io.on('done', (file) => {
       const queue = this.state.queue.slice();
 
       queue.push(file);
@@ -63,7 +75,7 @@ class Nas extends Component {
       content: (
         <Input
           defaultValue={name}
-          onChange={e => {
+          onChange={(e) => {
             this._name = e.target.value;
           }}
         />
@@ -87,11 +99,11 @@ class Nas extends Component {
     });
   };
 
-  handleTouchStart = e => {
+  handleTouchStart = (e) => {
     this.touchX = e.changedTouches[0].clientX;
   };
 
-  handleTouchMove = e => {
+  handleTouchMove = (e) => {
     const { clientX } = e.changedTouches[0];
 
     // move right, do nothing
@@ -117,7 +129,7 @@ class Nas extends Component {
     }
   };
 
-  handlePersist = path => {
+  handlePersist = (path) => {
     Modal.confirm({
       content: `Persist ${path} ?`,
       maskClosable: true,
@@ -138,13 +150,13 @@ class Nas extends Component {
     });
   };
 
-  handleCancel = fileName => {
+  handleCancel = (fileName) => {
     cancelPersist(fileName).then(({ code }) => {
       if (code === 200) this.setState({ cancel: true });
     });
   };
 
-  handleVideo = path => {
+  handleVideo = (path) => {
     this.setState({
       showVideo: true,
       videoSrc: `${config.NAS_SERVER}nas/${path}`,
@@ -159,7 +171,7 @@ class Nas extends Component {
       content,
       maskClosable: true,
       onOk: () =>
-        Promise.all(selectedFiles.map(x => deleteFile(x, false)))
+        Promise.all(selectedFiles.map((x) => deleteFile(x, false)))
           .then(this.syncFiles)
           .then(() => this.setState({ selectedFiles: [] })),
     });
@@ -174,9 +186,9 @@ class Nas extends Component {
       maskClosable: true,
       onOk: () =>
         Promise.all(selectedFiles.map(persistFile))
-          .then(responses => {
+          .then((responses) => {
             const desc = responses
-              .map(x => x.desc)
+              .map((x) => x.desc)
               .filter(Boolean)
               .join(',');
 
@@ -190,7 +202,7 @@ class Nas extends Component {
     this.setState({ showVideo: false });
   };
 
-  columns = uploaded => [
+  columns = (uploaded) => [
     {
       title: 'name',
       dataIndex: 'name',
@@ -208,13 +220,18 @@ class Nas extends Component {
           title={val}
           onTouchStart={this.handleTouchStart}
           onTouchMove={this.handleTouchMove}
-          onTouchEnd={e => this.handleTocuhEnd(path, e)}
+          onTouchEnd={(e) => this.handleTocuhEnd(path, e)}
         >
           {shorterText(val)}
         </div>
       ),
     },
-    { title: 'size', dataIndex: 'size', align: 'right', render: val => fmtBytes(val) },
+    {
+      title: 'size',
+      dataIndex: 'size',
+      align: 'right',
+      render: (val) => fmtBytes(val),
+    },
     {
       title: 'opt',
       align: 'center',
@@ -229,7 +246,7 @@ class Nas extends Component {
           <Button icon="delete" onClick={() => this.handleDelete(path)} />
           <Button
             icon="cloud-upload"
-            disabled={uploaded.map(x => x.id).includes(name)}
+            disabled={uploaded.map((x) => x.id).includes(name)}
             onClick={() => this.handlePersist(path)}
           />
         </Button.Group>
@@ -252,10 +269,10 @@ class Nas extends Component {
     const { available: ava, total } = disk;
 
     const diskSize = ava ? ` (${fmtBytes(ava, 2)}/${fmtBytes(total, 2)})` : '';
-    const uploaded = queue.filter(x => x.state === 'done');
+    const uploaded = queue.filter((x) => x.state === 'done');
     const rowSelection = {
       selectedRowKeys: selectedFiles,
-      onChange: selectedRowKeys => {
+      onChange: (selectedRowKeys) => {
         this.setState({ selectedFiles: selectedRowKeys });
       },
     };
@@ -266,7 +283,11 @@ class Nas extends Component {
         bordered={false}
         extra={
           <>
-            <Button type="primary" style={{ marginRight: 10 }} onClick={this.syncFiles}>
+            <Button
+              type="primary"
+              style={{ marginRight: 10 }}
+              onClick={this.syncFiles}
+            >
               sync
             </Button>
             <Button
@@ -283,7 +304,10 @@ class Nas extends Component {
             >
               delete
             </Button>
-            <Button disabled={selectedFiles.length === 0} onClick={this.handleBatchPersist}>
+            <Button
+              disabled={selectedFiles.length === 0}
+              onClick={this.handleBatchPersist}
+            >
               persist
             </Button>
           </>
@@ -300,7 +324,7 @@ class Nas extends Component {
             <List.Item>
               <Progress
                 percent={percent * 100}
-                format={per => (per === 100 ? '100%' : `${per.toFixed(2)}%`)}
+                format={(per) => (per === 100 ? '100%' : `${per.toFixed(2)}%`)}
               />
               <Button
                 shape="circle"
