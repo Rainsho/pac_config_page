@@ -2,20 +2,20 @@ const { resolve, basename, relative } = require('path');
 const fs = require('fs-extra');
 const disk = require('diskusage');
 const formidable = require('formidable');
-const { nas: nasDir, db } = require('../constants');
+const { nas: nasDir } = require('../constants');
 const { getAllFiles, beforePersist } = require('../utils/fsService');
-const { syncQueue } = require('../utils');
+const { syncQueue, db } = require('../utils');
 
 module.exports = {
-  'GET /fs/disk': async ctx => {
+  'GET /fs/disk': async (ctx) => {
     ctx.body = disk.checkSync('/');
   },
 
-  'GET /fs/file': async ctx => {
+  'GET /fs/file': async (ctx) => {
     ctx.body = await getAllFiles(nasDir);
   },
 
-  'PUT /fs/file': async ctx => {
+  'PUT /fs/file': async (ctx) => {
     const { path = '', name } = ctx.request.body;
     const oldFile = resolve(nasDir, path);
 
@@ -36,7 +36,7 @@ module.exports = {
     ctx.body = { code: 200, desc: 'put done!' };
   },
 
-  'DELETE /fs/file': async ctx => {
+  'DELETE /fs/file': async (ctx) => {
     const { path = '', purge } = ctx.request.body;
 
     if (purge) {
@@ -58,7 +58,7 @@ module.exports = {
     ctx.status = 204;
   },
 
-  'PUT /fs/ftpd': async ctx => {
+  'PUT /fs/ftpd': async (ctx) => {
     const { path = '' } = ctx.request.body;
     const file = resolve(nasDir, path);
     const desc = await beforePersist(file, ctx.io);
@@ -72,13 +72,13 @@ module.exports = {
     ctx.body = { code: 200, desc };
   },
 
-  'GET /fs/queue': async ctx => {
+  'GET /fs/queue': async (ctx) => {
     ctx.body = db.queue || [];
   },
 
-  'DELETE /fs/ftpd': async ctx => {
+  'DELETE /fs/ftpd': async (ctx) => {
     const { fileName = '' } = ctx.request.body;
-    const info = db.queue.find(x => x.id === fileName);
+    const info = db.queue.find((x) => x.id === fileName);
 
     if (info && typeof info.cancel === 'function') {
       await info.cancel();
@@ -89,8 +89,8 @@ module.exports = {
     }
   },
 
-  'POST /fs/upload': async ctx => {
-    const [err, , files] = await new Promise(res => {
+  'POST /fs/upload': async (ctx) => {
+    const [err, , files] = await new Promise((res) => {
       const form = new formidable.IncomingForm({ maxFileSize: 2 ** 31 }); // ~ 2G
 
       let fileInfo = { p: 0 };
@@ -118,7 +118,7 @@ module.exports = {
         .on('end', () => {
           ctx.io.emit('upload', { file: fileInfo.name, percent: 1 });
         })
-        .on('error', err => {
+        .on('error', (err) => {
           res(err);
         });
 

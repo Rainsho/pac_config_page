@@ -1,5 +1,4 @@
 node_modules
-_secret.js
-_bak.json
-_servers.json
 .vscode
+_secret.js
+_db.json

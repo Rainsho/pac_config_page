@@ -1,15 +1,10 @@
 const { resolve } = require('path');
+const fs = require('fs-extra');
 
 const isDev = process.env.NODE_ENV === 'development';
 
 const _default = {
-  nas: isDev ? '/Users/rainsho/Downloads' : '/home/maru/nas',
-  v2rayConfig: isDev ? '/Users/rainsho/Downloads/v2ray.json' : '/home/maru/configs/v2ray.json',
-  v2rayServers: resolve(__dirname, '_servers.json'),
-
-  // should persist
-  db: {},
-  bakFile: resolve(__dirname, '_bak.json'),
+  nas: isDev ? '/Users/rainsho/Downloads' : '/home/rainsho/nas',
 
   // should override by `_sercret.js`
   ftpServer: {
@@ -23,15 +18,7 @@ const _default = {
 };
 
 try {
-  const { last, queue } = require(_default.bakFile);
-
-  _default.db = { last, queue };
-} catch (e) {
-  console.warn(e);
-}
-
-try {
-  const _secret = require('./_secret');
+  const _secret = require('../_secret');
   Object.assign(_default, _secret);
 } catch (e) {
   console.warn(e);

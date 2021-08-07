@@ -9,8 +9,8 @@
     "watch": "export NODE_ENV=development && supervisor server/index.js",
     "build": "cd views && npm run build",
     "deploy": "npm run deploy:views && npm run deploy:secret",
-    "deploy:views": "scp -r views/build maru@10.0.0.22:apps/pac/views",
-    "deploy:secret": "scp server/constants/_secret.js maru@10.0.0.22:apps/pac/server/constants"
+    "deploy:views": "scp -r views/build rainsho@10.0.0.22:app/pac/views",
+    "deploy:secret": "scp server/_secret.js rainsho@10.0.0.22:app/pac/server"
   },
   "author": "Rainsho",
   "license": "ISC",

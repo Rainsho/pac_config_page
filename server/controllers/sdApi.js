@@ -1,15 +1,13 @@
-const { db } = require('../constants');
-const sync = require('../schedules/sync');
+const { db } = require('../utils');
 
 module.exports = {
-  'GET /sd/info': async ctx => {
+  'GET /sd/info': async (ctx) => {
     const { all } = ctx.request.query;
 
     if (all) {
-      const data = await sync();
-      ctx.body = data;
+      ctx.body = db.ips;
     } else {
-      ctx.body = db;
+      ctx.body = db.ips.slice(0, 20);
     }
   },
 };

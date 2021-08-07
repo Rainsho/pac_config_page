@@ -4,23 +4,22 @@ import { getSDInfo } from '../utils/api';
 import { IPInfo } from './common';
 
 class Info extends Component {
-  state = { info: {} };
+  state = { info: [] };
 
   componentDidMount() {
-    getSDInfo().then(info => this.setState({ info }));
+    getSDInfo().then((info) => this.setState({ info }));
   }
 
   update = () => {
-    getSDInfo().then(info => this.setState({ info }));
+    getSDInfo().then((info) => this.setState({ info }));
   };
 
   flush = () => {
-    getSDInfo(true).then(info => this.setState({ info }));
+    getSDInfo(true).then((info) => this.setState({ info }));
   };
 
   render() {
     const { info } = this.state;
-    const infos = Object.values(info).filter(({ i }) => i);
 
     return (
       <Card
@@ -35,7 +34,13 @@ class Info extends Component {
           </>
         }
       >
-        <List size="small" bordered dataSource={infos} renderItem={item => <IPInfo {...item} />} />
+        <List
+          size="small"
+          bordered
+          rowKey="s"
+          dataSource={info}
+          renderItem={(item) => <IPInfo {...item} />}
+        />
       </Card>
     );
   }
