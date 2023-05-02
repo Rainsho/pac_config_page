@@ -1,11 +1,9 @@
 const { resolve, relative, basename } = require('path');
 const fs = require('fs-extra');
-const PromiseFtp = require('promise-ftp');
-const iconv = require('iconv-lite');
 const constants = require('../constants');
 const { now, syncQueue } = require('./index');
 
-const { nas: nasDir, ftpServer, ftpDir } = constants;
+const { nas: nasDir, bridge: bridgeDir } = constants;
 const ftp_jobs = { current: null, queue: [] };
 
 async function getAllFiles(dir) {
@@ -26,6 +24,7 @@ async function getAllFiles(dir) {
 
 async function beforePersist(file, io) {
   const fileName = basename(file);
+  const target = resolve(bridgeDir, fileName);
 
   if (!fs.existsSync(file) || !io) {
     return `${fileName} may not exists`;
@@ -39,28 +38,9 @@ async function beforePersist(file, io) {
     return `${fileName} is in the queue, just wait`;
   }
 
-  const ftp = new PromiseFtp();
-  await ftp.connect(ftpServer);
-
-  try {
-    const list = await ftp.list(ftpDir);
-
-    if (!list || !list.length) {
-      throw new Error('something wrong with the FTP server');
-    }
-
-    const names = list
-      .filter(x => x.type !== 'd')
-      .map(({ name }) => iconv.decode(Buffer.from(name, 'binary'), 'utf-8'));
-
-    if (names.includes(fileName)) {
-      io.emit('done', { id: fileName, file, state: 'done', time: 'NOT SURE' });
-      throw new Error(`${fileName} may already persisted`);
-    }
-  } catch (e) {
-    return e.message;
-  } finally {
-    await ftp.end();
+  if (fs.existsSync(target)) {
+    io.emit('done', { id: fileName, file, state: 'done', time: 'NOT SURE' });
+    return `${fileName} may already persisted`;
   }
 
   ftp_jobs.queue.push(file);
@@ -84,24 +64,20 @@ async function doPersist(io) {
     ftp_jobs.current.file = file;
   });
 
-  const ftp = new PromiseFtp();
-  await ftp.connect(ftpServer);
-
   const { size } = fs.statSync(file);
-  const stream = fs.createReadStream(file);
+  const input = fs.createReadStream(file);
   const fileName = basename(file);
+  const target = resolve(bridgeDir, fileName);
+  const output = fs.createWriteStream(target);
 
-  // emit progress every 5MB transfered
-  const T = Math.ceil(size / (5 * 1024 * 1024));
+  // emit progress every 10MB transferred
+  const T = Math.ceil(size / (10 * 1024 * 1024));
 
   let doneSize = 0;
   let timer = now(false).t;
   let mileStone = new Array(T).fill(0).map((x, i) => (i + 1) * (1 / T));
-  let cancel = false;
 
-  stream.on('data', buff => {
-    if (cancel) return;
-
+  input.on('data', buff => {
     doneSize += buff.length;
 
     const percent = doneSize / size;
@@ -123,24 +99,27 @@ async function doPersist(io) {
     }
   });
 
+  input.on('end', () => {
+    ftp_jobs.current && ftp_jobs.current();
+  });
+
+  input.on('error', () => {
+    ftp_jobs.current && ftp_jobs.current();
+  });
+
   syncQueue(fileName, {
     file,
     state: 'uploading',
     cancel: async () => {
-      cancel = true;
-
+      input.close();
       ftp_jobs.current && ftp_jobs.current();
-      ftp_jobs.current = null;
+      fs.remove(target);
     },
   });
 
-  // call `ftp.end` in `cancel` will make `put` pending forever
-  await Promise.race([ftp.put(stream, `${ftpDir}/${fileName}`), ftpStatus]);
-  await ftp.end();
-
-  ftp_jobs.current && ftp_jobs.current();
+  input.pipe(output);
+  await ftpStatus;
   ftp_jobs.current = null;
-
   doPersist(io);
 }
 
