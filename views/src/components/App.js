@@ -25,6 +25,13 @@ export default () => (
         src={config.ARIA2_PAGE}
       />
     </TabPane>
+    <TabPane key="XUNLEI" tab="XUNLEI">
+      <iframe
+        title="XUNLEI"
+        style={{ border: 'none', height: '100vh', width: '100vw' }}
+        src={config.XUNLEI_PAGE}
+      />
+    </TabPane>
     <TabPane key="INFO" tab="INFO">
       <Info />
     </TabPane>

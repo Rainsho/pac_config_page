@@ -7,6 +7,7 @@ const config = {
   // IO_PATH: 'http://localhost:3000/',
   IO_PATH: 'http://10.0.0.22/',
   SYMLINK: 'TDDOWNLOAD',
+  XUNLEI_PAGE: 'http://10.0.0.22/xunlei/',
 };
 
 if (process.env.NODE_ENV === 'production') {
@@ -16,6 +17,7 @@ if (process.env.NODE_ENV === 'production') {
     DROPPY_PAGE: '/droppy/',
     NAS_SERVER: '/',
     IO_PATH: '/',
+    XUNLEI_PAGE: '/xunlei/',
   });
 }
 
