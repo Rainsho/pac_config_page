@@ -50,3 +50,7 @@ export function getQueue() {
 export function cancelPersist(fileName) {
   return Request.delete(`${API_SERVER}fs/ftpd`, { fileName });
 }
+
+export function dumpFile(path) {
+  return Request.post(`${API_SERVER}fs/dump`, { path });
+}

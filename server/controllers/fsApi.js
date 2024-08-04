@@ -1,8 +1,8 @@
-const { resolve, basename, relative } = require('path');
+const { resolve, basename, relative, join } = require('path');
 const fs = require('fs-extra');
 const disk = require('diskusage');
 const formidable = require('formidable');
-const { nas: nasDir } = require('../constants');
+const { nas: nasDir, symlink, xunlei: xunleiDir } = require('../constants');
 const { getAllFiles, beforePersist } = require('../utils/fsService');
 const { syncQueue, db } = require('../utils');
 
@@ -41,6 +41,8 @@ module.exports = {
 
     if (purge) {
       await fs.emptyDir(nasDir);
+      await fs.emptyDir(xunleiDir);
+      await fs.symlink(xunleiDir, join(nasDir, symlink), 'dir');
       syncQueue();
       ctx.body = { code: 200, desc: 'purge done!' };
       return;
@@ -130,5 +132,26 @@ module.exports = {
     } else {
       ctx.status = 204;
     }
+  },
+
+  'POST /fs/dump': async (ctx) => {
+    const { path = '' } = ctx.request.body;
+
+    if (path.startsWith(symlink)) {
+      const src = join(xunleiDir, path.replace(symlink, ''));
+      const dest = join(nasDir, relative(xunleiDir, src));
+
+      if (fs.existsSync(dest)) {
+        ctx.status = 400;
+        ctx.body = 'file exists';
+        return;
+      }
+
+      await fs.move(src, dest);
+      ctx.body = { code: 200, desc: 'moved' };
+      return;
+    }
+
+    ctx.status = 204;
   },
 };

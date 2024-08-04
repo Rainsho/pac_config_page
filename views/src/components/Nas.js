@@ -19,6 +19,7 @@ import {
   persistFile,
   getQueue,
   cancelPersist,
+  dumpFile,
 } from '../utils/api';
 import { fmtBytes, shorterText } from '../utils/util';
 import config from '../utils/config';
@@ -44,14 +45,14 @@ class Nas extends Component {
 
     this.syncFiles = () => {
       Promise.all([getFiles(), getDisk(), getQueue()]).then(
-        ([files, disk, queue]) => this.setState({ files, disk, queue })
+        ([files, disk, queue]) => this.setState({ files, disk, queue }),
       );
     };
 
     this.io = io(config.IO_PATH);
 
     this.io.on('progress', ({ file, percent }) =>
-      this.setState({ file, percent })
+      this.setState({ file, percent }),
     );
 
     this.io.on('done', (file) => {
@@ -144,7 +145,7 @@ class Nas extends Component {
             persistFile(path).then(({ desc }) => {
               if (desc) notification.error({ message: desc.toString() });
             });
-          }
+          },
         );
       },
     });
@@ -248,6 +249,11 @@ class Nas extends Component {
             icon="cloud-upload"
             disabled={uploaded.map((x) => x.id).includes(name)}
             onClick={() => this.handlePersist(path)}
+          />
+          <Button
+            icon="cloud-sync"
+            disabled={!path.startsWith(config.SYMLINK)}
+            onClick={() => dumpFile(path).then(this.syncFiles)}
           />
         </Button.Group>
       ),

@@ -42,6 +42,11 @@ function checkStatus(response) {
       message: `Got status ${response.status}`,
       description: 'What did you do?',
     });
+
+    if (response.status >= 400) {
+      return Promise.reject();
+    }
+
     return Promise.resolve({});
   }
 
