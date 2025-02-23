@@ -6,9 +6,8 @@ const isDev = process.env.NODE_ENV === 'development';
 const _default = {
   nas: isDev ? '/Users/rainsho/Downloads/t1' : '/home/rainsho/nas',
   bridge: isDev ? '/Users/rainsho/Downloads/t2' : '/mnt/modok/bridge',
-  xunlei: isDev
-    ? '/Users/rainsho/Downloads/t3'
-    : '/mnt/raind/downloads/bridge',
+  xunlei: isDev ? '/Users/rainsho/Downloads/t3' : '/mnt/raind/downloads/bridge',
+  raind: isDev ? '/Users/rainsho/Downloads/t4' : '/mnt/raind/void',
   symlink: 'TDDOWNLOAD',
 
   // should override by `_sercret.js`
@@ -31,7 +30,7 @@ try {
 
 if (isDev) {
   Promise.all(
-    [_default.nas, _default.bridge, _default.xunlei].map((d) =>
+    [_default.nas, _default.bridge, _default.xunlei, _default.raind].map((d) =>
       fs.ensureDir(d),
     ),
   );

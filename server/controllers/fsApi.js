@@ -2,7 +2,12 @@ const { resolve, basename, relative, join } = require('path');
 const fs = require('fs-extra');
 const disk = require('diskusage');
 const formidable = require('formidable');
-const { nas: nasDir, symlink, xunlei: xunleiDir } = require('../constants');
+const {
+  nas: nasDir,
+  symlink,
+  xunlei: xunleiDir,
+  raind: voidDir,
+} = require('../constants');
 const { getAllFiles, beforePersist } = require('../utils/fsService');
 const { syncQueue, db } = require('../utils');
 
@@ -139,7 +144,7 @@ module.exports = {
 
     if (path.startsWith(symlink)) {
       const src = join(xunleiDir, path.replace(symlink, ''));
-      const dest = join(nasDir, relative(xunleiDir, src));
+      const dest = join(voidDir, relative(xunleiDir, src));
 
       if (fs.existsSync(dest)) {
         ctx.status = 400;
