@@ -8,7 +8,7 @@ const _default = {
   bridge: isDev ? '/Users/rainsho/Downloads/t2' : '/mnt/modok/bridge',
   xunlei: isDev
     ? '/Users/rainsho/Downloads/t3'
-    : '/home/rainsho/app/xunlei/downloads/bridge',
+    : '/mnt/raind/downloads/bridge',
   symlink: 'TDDOWNLOAD',
 
   // should override by `_sercret.js`
