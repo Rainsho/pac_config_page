@@ -13,7 +13,7 @@ const { syncQueue, db } = require('../utils');
 
 module.exports = {
   'GET /fs/disk': async (ctx) => {
-    ctx.body = disk.checkSync('/');
+    ctx.body = disk.checkSync('/home');
   },
 
   'GET /fs/file': async (ctx) => {
