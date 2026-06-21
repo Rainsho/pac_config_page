@@ -5,6 +5,7 @@ import { rename, rm } from 'fs/promises';
 import { paths } from '@/lib/constants-node';
 import { getAllFiles, ensureDevDirs } from '@/lib/fs-service';
 import { syncQueue } from '@/lib/db';
+import { logError, logInfo, logWarn } from '@/lib/logger';
 
 export async function GET() {
   await ensureDevDirs();
@@ -22,34 +23,52 @@ export async function PUT(request: NextRequest) {
 
   const target = resolve(oldFile, '..', name);
 
-  // Path traversal protection
   if (relative(paths.nas, target).startsWith('..')) {
+    logWarn('rename rejected (path traversal):', path, '->', name);
     return NextResponse.json({ error: 'illegal operate' }, { status: 403 });
   }
 
-  await rename(oldFile, target);
-  return NextResponse.json({ code: 200, desc: 'put done!' });
+  try {
+    await rename(oldFile, target);
+    logInfo('renamed:', oldFile, '->', target);
+    return NextResponse.json({ code: 200, desc: 'put done!' });
+  } catch (e) {
+    logError('rename failed:', { path, name }, e);
+    return NextResponse.json({ error: 'rename failed' }, { status: 500 });
+  }
 }
 
 export async function DELETE(request: NextRequest) {
   const { path = '', purge } = await request.json();
 
   if (purge) {
-    await rm(paths.nas, { recursive: true });
-    await rm(paths.xunlei, { recursive: true });
-    await ensureDevDirs();
-    const { symlink } = await import('fs/promises');
-    await symlink(paths.xunlei, join(paths.nas, paths.symlink), 'dir');
-    syncQueue('', {}, true);
-    return NextResponse.json({ code: 200, desc: 'purge done!' });
+    try {
+      await rm(paths.nas, { recursive: true });
+      await rm(paths.xunlei, { recursive: true });
+      await ensureDevDirs();
+      const { symlink } = await import('fs/promises');
+      await symlink(paths.xunlei, join(paths.nas, paths.symlink), 'dir');
+      syncQueue('', {}, true);
+      logInfo('purged nas and xunlei directories');
+      return NextResponse.json({ code: 200, desc: 'purge done!' });
+    } catch (e) {
+      logError('purge failed:', e);
+      return NextResponse.json({ error: 'purge failed' }, { status: 500 });
+    }
   }
 
   const file = resolve(paths.nas, path);
 
   if (path && existsSync(file)) {
-    await rm(file, { recursive: true });
-    syncQueue(basename(file), {}, true);
-    return NextResponse.json({ code: 200, desc: 'delete done!' });
+    try {
+      await rm(file, { recursive: true });
+      syncQueue(basename(file), {}, true);
+      logInfo('deleted:', file);
+      return NextResponse.json({ code: 200, desc: 'delete done!' });
+    } catch (e) {
+      logError('delete failed:', { path }, e);
+      return NextResponse.json({ error: 'delete failed' }, { status: 500 });
+    }
   }
 
   return new NextResponse(null, { status: 204 });

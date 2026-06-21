@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import { writeFile } from 'fs/promises';
 import { paths } from '@/lib/constants-node';
 import { ensureDevDirs } from '@/lib/fs-service';
+import { logError, logInfo } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   await ensureDevDirs();
@@ -14,9 +15,15 @@ export async function POST(request: NextRequest) {
     return new NextResponse(null, { status: 204 });
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
   const dest = resolve(paths.nas, file.name);
-  await writeFile(dest, buffer);
 
-  return NextResponse.json({ code: 200, desc: `${file.name} done!` });
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await writeFile(dest, buffer);
+    logInfo('uploaded:', dest, `(${buffer.length} bytes)`);
+    return NextResponse.json({ code: 200, desc: `${file.name} done!` });
+  } catch (e) {
+    logError('upload failed:', file.name, e);
+    return NextResponse.json({ error: 'upload failed' }, { status: 500 });
+  }
 }

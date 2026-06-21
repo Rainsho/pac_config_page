@@ -5,6 +5,7 @@ import { rm, mkdir, readdir, stat } from 'fs/promises';
 import { paths } from './constants-node';
 import { syncQueue } from './db';
 import { SSEManager } from './sse';
+import { logError, logInfo } from './logger';
 
 const { nas: nasDir, bridge: bridgeDir } = paths;
 
@@ -99,8 +100,10 @@ async function doPersist(sse: SSEManager): Promise<void> {
 
     if (percent === 1) {
       const s = new Date().toLocaleString();
+      const cost = Date.now() - timer;
       syncQueue(fileName, { file, state: 'done', time: s });
       sse.emit('done', { id: fileName, file, state: 'done', time: s });
+      logInfo('persist done:', fileName, `${cost}ms`);
     }
 
     if (mileStone.length > doneStone.length) {
@@ -115,7 +118,8 @@ async function doPersist(sse: SSEManager): Promise<void> {
     ftpJobs.current?.resolve();
   });
 
-  input.on('error', () => {
+  input.on('error', (e) => {
+    logError('persist failed:', file, e);
     ftpJobs.current?.resolve();
   });
 
