@@ -11,7 +11,10 @@ import { useAuth, setupAuthListener } from '@/hooks/useAuth';
 const TABS = ['NAS', 'DROPPY', 'ARIA2', 'XUNLEI', 'INFO'] as const;
 type Tab = (typeof TABS)[number];
 
-const IFRAME_URLS: Record<string, string> = {
+const IFRAME_TABS = ['DROPPY', 'ARIA2', 'XUNLEI'] as const;
+type IframeTabKey = (typeof IFRAME_TABS)[number];
+
+const IFRAME_URLS: Record<IframeTabKey, string> = {
   DROPPY: '/droppy/',
   ARIA2: '/aria2/',
   XUNLEI: '/xunlei/',
@@ -19,21 +22,33 @@ const IFRAME_URLS: Record<string, string> = {
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('NAS');
+  const [mountedIframeTabs, setMountedIframeTabs] = useState<Set<IframeTabKey>>(new Set());
   const { showModal, toast, showToast, openAuth, onAuthSuccess, onAuthCancel } = useAuth();
 
   useEffect(() => {
     return setupAuthListener(showToast, openAuth);
   }, [showToast, openAuth]);
 
+  useEffect(() => {
+    if ((IFRAME_TABS as readonly string[]).includes(activeTab)) {
+      setMountedIframeTabs((prev) => new Set(prev).add(activeTab as IframeTabKey));
+    }
+  }, [activeTab]);
+
   return (
     <div className="min-h-screen">
       <TabBar tabs={[...TABS]} active={activeTab} onChange={(t) => setActiveTab(t as Tab)} />
 
-      <div className="p-4">
+      <div className="py-4">
         {activeTab === 'NAS' && <NasTab />}
-        {activeTab === 'DROPPY' && <IframeTab src={IFRAME_URLS.DROPPY} title="DROPPY" />}
-        {activeTab === 'ARIA2' && <IframeTab src={IFRAME_URLS.ARIA2} title="ARIA2" />}
-        {activeTab === 'XUNLEI' && <IframeTab src={IFRAME_URLS.XUNLEI} title="XUNLEI" />}
+        {IFRAME_TABS.map(
+          (tab) =>
+            mountedIframeTabs.has(tab) && (
+              <div key={tab} className={activeTab === tab ? undefined : 'hidden'}>
+                <IframeTab src={IFRAME_URLS[tab]} title={tab} />
+              </div>
+            ),
+        )}
         {activeTab === 'INFO' && <InfoTab />}
       </div>
 
