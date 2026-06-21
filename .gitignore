@@ -2,3 +2,7 @@ node_modules
 .vscode
 _secret.js
 _db.json
+
+# deploy artifacts
+/deploy-*.tar.gz
+/_deploy/
