@@ -81,7 +81,6 @@ src/app/              Next.js App Router pages and API routes
 src/components/       UI components
 src/hooks/            Client hooks
 src/lib/              Auth, filesystem, DB, SSE, and constants
-scripts/              Utility scripts
 public/               Static assets
 _archive_/            Archived pre-migration app
 ```

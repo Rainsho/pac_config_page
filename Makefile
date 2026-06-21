@@ -9,7 +9,6 @@ package: build
 	cp -R .next/standalone/. _deploy/pac/
 	cp -R .next/static _deploy/pac/.next/
 	cp -R public _deploy/pac/
-	cp -R scripts _deploy/pac/
 	cp .env.local _deploy/pac/.env
 	tar -czf deploy-$(shell date +%Y%m%d%H%M).tar.gz -C _deploy .
 	rm -rf _deploy
