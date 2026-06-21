@@ -1,7 +1,10 @@
 import { readFile, writeFile } from 'fs/promises';
 import { resolve } from 'path';
 
-const DB_PATH = resolve(process.cwd(), '_db.json');
+const DB_PATH =
+  process.env.NODE_ENV === 'production'
+    ? resolve(process.cwd(), '../..', '_db.json')
+    : resolve(process.cwd(), '_db.json');
 
 export interface IpRecord {
   s: string;

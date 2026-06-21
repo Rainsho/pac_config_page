@@ -39,7 +39,7 @@ export default function Home() {
     <div className="min-h-screen">
       <TabBar tabs={[...TABS]} active={activeTab} onChange={(t) => setActiveTab(t as Tab)} />
 
-      <div className="py-4">
+      <div className="p-4">
         {activeTab === 'NAS' && <NasTab />}
         {IFRAME_TABS.map(
           (tab) =>
