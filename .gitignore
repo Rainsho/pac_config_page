@@ -10,6 +10,7 @@ node_modules/
 
 # next.js
 .next/
+next-env.d.ts
 out/
 
 # production
@@ -25,6 +26,11 @@ coverage/
 # local data
 _db.json
 /tmp/
+
+# deploy/build artifacts
+_deploy/
+deploy-*.tar.gz
+*.tsbuildinfo
 
 # logs
 *.log
