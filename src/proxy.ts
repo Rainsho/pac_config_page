@@ -4,7 +4,8 @@ import { logRequest, logWarn } from './lib/logger';
 
 export async function proxy(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';
-  const { method, pathname } = request.nextUrl;
+  const { method } = request;
+  const { pathname } = request.nextUrl;
 
   logRequest(ip, method, pathname);
 

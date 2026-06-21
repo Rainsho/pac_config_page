@@ -1,38 +1,29 @@
 {
   "name": "pac",
-  "version": "1.1.0",
-  "description": "pac_config_tool",
-  "main": "index.js",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "start": "export NODE_ENV=production && /usr/local/n/versions/node/10.24.1/bin/node server/index.js",
-    "dev": "export NODE_ENV=development && node server/index.js",
-    "watch": "export NODE_ENV=development && supervisor server/index.js",
-    "build": "cd views && npm run build",
-    "deploy": "npm run deploy:views && npm run deploy:secret",
-    "deploy:views": "scp -r views/build rainsho@10.0.0.22:app/pac/views",
-    "deploy:secret": "scp server/_secret.js rainsho@10.0.0.22:app/pac/server"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
   },
-  "author": "Rainsho",
-  "license": "ISC",
   "dependencies": {
-    "@koa/cors": "^2.2.3",
-    "diskusage": "^0.2.6",
-    "formidable": "^1.2.2",
-    "fs-extra": "^7.0.1",
-    "iconv-lite": "^0.4.24",
-    "jsonwebtoken": "^8.5.1",
-    "koa": "^2.13.0",
-    "koa-bodyparser": "^4.3.0",
-    "koa-jwt": "^3.6.0",
-    "koa-router": "^7.4.0",
-    "node-fetch": "^2.6.0",
-    "node-schedule": "^1.3.2",
-    "ping": "0.2.2",
-    "promise-ftp": "^1.3.5",
-    "socket.io": "^2.3.0"
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.2.4",
+    "jose": "^6.2.3",
+    "next": "16.2.4",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "video.js": "^8.23.7"
   },
   "devDependencies": {
-    "supervisor": "^0.12.0"
-  },
-  "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be"
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.4",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
 }

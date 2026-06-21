@@ -1,48 +1,87 @@
-# Rainsho's Nexus Manager
+# PAC
 
-I hava an old Nexus 5 running [maruos](https://maruos.com/#/), which has a simple Debian Linux System. This project is running on the Nexus device.
+PAC is a private Next.js app for NAS file management and service dashboards. It provides:
 
-At first it's just a http-proxy server, as time went by I engaged nas and schedule modules in it. And using React to refactor the frount-end. So right now, it just looks like this:
+- NAS browsing, upload, download, delete, move, and video preview workflows
+- Authenticated file operations backed by Next.js API routes
+- Service tabs for Droppy, Aria2, Xunlei, and host info
+- Server-sent upload/progress updates
 
-![pic_001](./assets/pic_001.png)
+The previous Node/React implementation has been archived in `_archive_/`.
 
-## NAS
+## Requirements
 
-![pic_002](./assets/pic_002.png)
+- Node.js 20+
+- pnpm
 
-- 简单 io (配合 nginx)
-- 使用 FTP 客户端上传至远端服务器
-- 使用 socket.io 广播上传进度
-- 使用队列保存任务信息及取消上传功能支持
+## Setup
 
-## PAC
+Install dependencies:
 
-![pic_003](./assets/pic_003.png)
+```bash
+pnpm install
+```
 
-> 转发过程  
-> VPS: Internet → ss-server(socks5) → kcp-server(udp) →  
-> Intranet: kcp-client(udp) → ss-local(socks5) → polipo(http) → pac → LAN
+Create local environment config:
 
-外网部分设置省略，内网部分：
+```bash
+cp .env.local.example .env.local
+```
 
-- 动态更新 kcp-client 配置并转发到指定端口 1
-- ss-local 监听设备上指定端口 1，并转发至指定端口 2
-- polipo 监听指定端口 2，并转发至指定端口 3
-- 从 pac 模版文件，动态更新内网 IP 和指定端口 3 生成 pac 文件，并通过 nginx 暴露
-- 内网设备通过设置使用上方暴露 pac 文件实现自动代理
+Set at least these values before running outside local development:
 
-## ARIA2
+```bash
+JWT_SECRET=change-me-to-a-random-string
+JWT_CODE=change-me-to-your-login-code
+```
 
-![pic_004](./assets/pic_004.png)
+NAS paths are optional in development. When `NODE_ENV=development`, the app uses `/tmp/nexus-dev/*` paths automatically. In production, configure these if the defaults do not match the host:
 
-集成 aria2 功能加 [webui](https://github.com/ziahamza/webui-aria2)
+```bash
+NAS_DIR=/home/rainsho/nas
+BRIDGE_DIR=/mnt/modok/bridge
+XUNLEI_DIR=/mnt/raind/downloads/bridge
+VOID_DIR=/mnt/raind/void
+```
 
-## INFO
+## Development
 
-![pic_005](./assets/pic_005.png)
+Run the dev server:
 
-定时任务相关部分，目前仅用来记录内网 IP 波动情况。相关内容参考 [schedules](./server/schedules) 。
+```bash
+pnpm dev
+```
 
-## CHANGELOG
+Open http://localhost:3000.
 
-just have fun~
+## Production
+
+Build and run:
+
+```bash
+pnpm build
+pnpm start
+```
+
+The app listens on `PORT` when provided, otherwise Next.js defaults to port `3000`.
+
+## Scripts
+
+```bash
+pnpm dev      # start Next.js development server
+pnpm build    # create production build
+pnpm start    # run production server
+pnpm lint     # run ESLint
+```
+
+## Project Layout
+
+```text
+src/app/              Next.js App Router pages and API routes
+src/components/       UI components
+src/hooks/            Client hooks
+src/lib/              Auth, filesystem, DB, SSE, and constants
+scripts/              Utility scripts
+public/               Static assets
+_archive_/            Archived pre-migration app
+```
