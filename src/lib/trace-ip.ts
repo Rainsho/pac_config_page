@@ -6,6 +6,14 @@ const URL = 'http://myip.ipip.net/';
 const UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36';
 
+function extractIp(text: string): string {
+  return (
+    text.match(/(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}/i)?.[0] ||
+    text.match(/\d+\.\d+\.\d+\.\d+/)?.[0] ||
+    text
+  );
+}
+
 export async function traceIp(): Promise<void> {
   const s = new Date().toLocaleString();
 
@@ -13,7 +21,7 @@ export async function traceIp(): Promise<void> {
   try {
     const res = await fetch(URL, { headers: { 'User-Agent': UA } });
     const text = (await res.text()).trim();
-    ipOrErr = text.match(/\d+\.\d+\.\d+\.\d+/)?.[0] || text;
+    ipOrErr = extractIp(text);
   } catch (e: unknown) {
     ipOrErr = (e as { code?: string })?.code || 'UNKNOWN';
     logWarn(TAG, 'fetch failed:', ipOrErr);
