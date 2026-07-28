@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resolve, relative, join, basename } from 'path';
 import { existsSync } from 'fs';
-import { rename, rm } from 'fs/promises';
+import { mkdir, rename, rm } from 'fs/promises';
 import { paths } from '@/lib/constants-node';
 import { getAllFiles, ensureDevDirs } from '@/lib/fs-service';
 import { syncQueue } from '@/lib/db';
@@ -43,9 +43,16 @@ export async function DELETE(request: NextRequest) {
 
   if (purge) {
     try {
-      await rm(paths.nas, { recursive: true });
-      await rm(paths.xunlei, { recursive: true });
-      await ensureDevDirs();
+      // Match fs-extra's emptyDir: purge contents while leaving both directories
+      // available for the symlink and subsequent writes in every environment.
+      await Promise.all([
+        rm(paths.nas, { recursive: true, force: true }),
+        rm(paths.xunlei, { recursive: true, force: true }),
+      ]);
+      await Promise.all([
+        mkdir(paths.nas, { recursive: true }),
+        mkdir(paths.xunlei, { recursive: true }),
+      ]);
       const { symlink } = await import('fs/promises');
       await symlink(paths.xunlei, join(paths.nas, paths.symlink), 'dir');
       syncQueue('', {}, true);
