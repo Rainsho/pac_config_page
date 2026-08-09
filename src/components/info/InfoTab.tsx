@@ -9,7 +9,10 @@ interface IpRecord {
 }
 
 function isIP(str: string): boolean {
-  return /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(str);
+  return (
+    /(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}/i.test(str) ||
+    /\d+\.\d+\.\d+\.\d+/.test(str)
+  );
 }
 
 export function InfoTab() {

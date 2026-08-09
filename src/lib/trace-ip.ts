@@ -3,6 +3,7 @@ import { logError, logInfo, logWarn } from './logger';
 
 const TAG = '[trace-ip]';
 const URL = 'http://myip.ipip.net/';
+const LAST_SEEN_LIMIT = 10;
 const UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36';
 
@@ -34,7 +35,7 @@ export async function traceIp(): Promise<void> {
   }
 
   last.push(ipOrErr);
-  if (last.length > 2) last.shift();
+  if (last.length > LAST_SEEN_LIMIT) last.shift();
 
   const t = new Date().toLocaleString();
   addIp({ s, t, i: ipOrErr });
